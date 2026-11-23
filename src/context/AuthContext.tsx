@@ -9,6 +9,9 @@ interface AuthContextType {
   currentUser: UserProfile;
   currentRole: UserRole;
   switchRole: (role: UserRole) => void;
+  loginAsUser: (userId: string) => boolean;
+  loginWithProfile: (profile: UserProfile) => void;
+  logout: () => void;
   can: (action: string) => boolean;
   allProfiles: UserProfile[];
   refreshProfiles: () => Promise<void>;
@@ -25,10 +28,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const list = await db.getProfiles();
       if (list && list.length > 0) {
         setProfiles(list);
-        const savedRoleId = typeof window !== "undefined" ? localStorage.getItem("falcon_crm_active_user_id") : null;
-        if (savedRoleId) {
-          const found = list.find((p) => p.id === savedRoleId);
-          if (found) setCurrentUser(found);
+        if (typeof window !== "undefined") {
+          const urlParams = new URLSearchParams(window.location.search);
+          const repParam = urlParams.get("rep") || urlParams.get("user") || urlParams.get("token");
+          if (repParam) {
+            const match = list.find((p) => p.id === repParam || p.email.toLowerCase() === repParam.toLowerCase());
+            if (match) {
+              setCurrentUser(match);
+              localStorage.setItem("falcon_crm_active_user_id", match.id);
+              return;
+            }
+          }
+          const savedRoleId = localStorage.getItem("falcon_crm_active_user_id");
+          if (savedRoleId) {
+            const found = list.find((p) => p.id === savedRoleId);
+            if (found) setCurrentUser(found);
+          }
         }
       }
     } catch (e) {
@@ -46,6 +61,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.setItem("falcon_crm_active_user_id", target.id);
     }
+  };
+
+  const loginAsUser = (userId: string): boolean => {
+    const target =
+      profiles.find((p) => p.id === userId || p.email.toLowerCase() === userId.toLowerCase()) ||
+      initialProfiles.find((p) => p.id === userId || p.email.toLowerCase() === userId.toLowerCase());
+    if (target) {
+      setCurrentUser(target);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("falcon_crm_active_user_id", target.id);
+      }
+      return true;
+    }
+    return false;
+  };
+
+  const loginWithProfile = (profile: UserProfile) => {
+    setCurrentUser(profile);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("falcon_crm_active_user_id", profile.id);
+    }
+  };
+
+  const logout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("falcon_crm_active_user_id");
+    }
+    const admin = profiles.find((p) => p.role === "admin") || initialProfiles[0];
+    setCurrentUser(admin);
   };
 
   const can = (action: string): boolean => {
@@ -83,6 +127,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         currentUser,
         currentRole: currentUser.role,
         switchRole,
+        loginAsUser,
+        loginWithProfile,
+        logout,
         can,
         allProfiles: profiles,
         refreshProfiles,

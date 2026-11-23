@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/db";
@@ -26,12 +27,17 @@ import {
   Crown,
   Briefcase,
   UserCog,
+  Copy,
+  Check,
+  LogIn,
+  KeyRound,
 } from "lucide-react";
 
 export default function TeamPage() {
+  const router = useRouter();
   const { t, language } = useLanguage();
   const isAr = language === "ar";
-  const { currentUser, currentRole, can, refreshProfiles } = useAuth();
+  const { currentUser, currentRole, can, refreshProfiles, loginWithProfile } = useAuth();
   const isSuperAdmin = can("manage_admins") || currentRole === "admin";
 
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -39,10 +45,43 @@ export default function TeamPage() {
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<UserProfile | null>(null);
+
+  const getLoginUrl = (profile: UserProfile) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app";
+    return `${origin}/login?rep=${profile.id}`;
+  };
+
+  const handleCopyLoginLink = (profile: UserProfile) => {
+    const url = getLoginUrl(profile);
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+    }
+    setCopiedId(profile.id);
+    setTimeout(() => {
+      setCopiedId(null);
+    }, 2200);
+  };
+
+  const getWhatsAppShareUrl = (profile: UserProfile) => {
+    const loginLink = getLoginUrl(profile);
+    const cleanPhone = (profile.phone || "").replace(/[^0-9]/g, "");
+    const text = isAr
+      ? `مرحباً يا ${profile.full_name} 👋\n\nإليك رابط دخولك المباشر لمنصة مبيعات ومعارض Falcon CNC:\n${loginLink}\n\nيمكنك من خلال هذا الرابط تسجيل العملاء بالمعرض ومتابعة صفقاتك بشكل منفصل.`
+      : `Hello ${profile.full_name},\n\nHere is your direct access link for Falcon CNC Exhibition CRM:\n${loginLink}\n\nUse this link to capture booth leads and track your deals separately.`;
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+  };
+
+  const handleLoginAs = (profile: UserProfile) => {
+    if (loginWithProfile) {
+      loginWithProfile(profile);
+      router.push("/leads?source=switch_user");
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -482,6 +521,69 @@ export default function TeamPage() {
                       <span className="text-xs sm:text-sm font-bold text-emerald-400">
                         {repWon}
                       </span>
+                    </div>
+                  </div>
+
+                  {/* 4.5. DIRECT ACCESS LINK BOX FOR THIS EMPLOYEE */}
+                  <div className="mt-3.5 p-3 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                        <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>{isAr ? "رابط الدخول المباشر للموظف" : "Direct Staff Login Link"}</span>
+                      </span>
+                      <span className="text-cyan-400/80 font-mono text-[9px] truncate max-w-[120px]">
+                        /login?rep={profile.id.substring(0, 8)}...
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      {/* Copy Login Link Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleCopyLoginLink(profile)}
+                        className={`flex-1 py-1.5 px-2.5 rounded-xl border text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all ${
+                          copiedId === profile.id
+                            ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-300 shadow-sm"
+                            : "bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-400/30 text-cyan-300"
+                        }`}
+                      >
+                        {copiedId === profile.id ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>{isAr ? "تم النسخ!" : "Copied!"}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>{isAr ? "نسخ الرابط" : "Copy Link"}</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* WhatsApp Share Button */}
+                      {profile.phone && (
+                        <a
+                          href={getWhatsAppShareUrl(profile)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-1.5 px-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 text-emerald-300 text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
+                          title={isAr ? "إرسال الرابط عبر واتساب" : "Send link via WhatsApp"}
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>{isAr ? "واتساب" : "WhatsApp"}</span>
+                        </a>
+                      )}
+
+                      {/* Login As Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleLoginAs(profile)}
+                        className="py-1.5 px-2.5 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
+                        title={isAr ? `دخول كـ ${profile.full_name}` : `Login as ${profile.full_name}`}
+                      >
+                        <LogIn className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>{isAr ? "دخول" : "Login"}</span>
+                      </button>
                     </div>
                   </div>
                 </div>

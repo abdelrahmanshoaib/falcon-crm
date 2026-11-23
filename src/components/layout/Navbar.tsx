@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface NavbarProps {
   onOpenQuickAdd: () => void;
@@ -195,8 +196,12 @@ export function Navbar({ onOpenQuickAdd }: NavbarProps) {
             )}
           </div>
 
-          {/* Current User Pill */}
-          <div className="flex items-center gap-2 border-l border-white/10 pl-2.5 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-2.5">
+          {/* Current User Pill -> Links to /login portal */}
+          <Link
+            href="/login"
+            className="flex items-center gap-2 border-l border-white/10 pl-2.5 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-2.5 hover:opacity-80 transition-opacity"
+            title={language === "ar" ? "بوابة تسجيل الدخول وتبديل الموظف" : "Login Portal & Switch Staff"}
+          >
             <div className="relative">
               <img
                 src={currentUser.avatar_url || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"}
@@ -205,10 +210,15 @@ export function Navbar({ onOpenQuickAdd }: NavbarProps) {
               />
               <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-slate-950" />
             </div>
-            <span className="text-xs font-semibold text-slate-200 hidden md:inline truncate max-w-[120px]">
-              {currentUser.full_name}
-            </span>
-          </div>
+            <div className="hidden md:flex flex-col text-start">
+              <span className="text-xs font-semibold text-slate-200 truncate max-w-[120px]">
+                {currentUser.full_name}
+              </span>
+              <span className="text-[9px] text-cyan-400/80 -mt-0.5">
+                {currentUser.role.replace("_", " ")}
+              </span>
+            </div>
+          </Link>
         </div>
       </div>
 

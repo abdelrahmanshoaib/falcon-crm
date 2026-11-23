@@ -316,6 +316,27 @@ export function QuickLeadModal({
               </button>
             </div>
 
+            {/* Sales Rep Attribution Bar */}
+            <div className="mx-4 mt-3 px-3.5 py-2 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <img
+                  src={
+                    currentUser.avatar_url ||
+                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"
+                  }
+                  alt={currentUser.full_name}
+                  className="w-6 h-6 rounded-full object-cover border border-cyan-400/50 shadow-sm"
+                />
+                <span className="text-[11px] text-slate-300">
+                  {language === "ar" ? "الموظف المسؤول:" : "Assigned Sales Rep:"}{" "}
+                  <strong className="text-white font-bold">{currentUser.full_name}</strong>
+                </span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 font-semibold">
+                {language === "ar" ? "تسجيل منفصل" : "Isolated Record"}
+              </span>
+            </div>
+
             {/* DUPLICATE WARNING BANNER */}
             {duplicateLead && !bypassDuplicate && (
               <div className="m-4 mb-0 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs space-y-2 shadow-[0_0_20px_rgba(245,158,11,0.2)]">

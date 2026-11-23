@@ -72,13 +72,12 @@ function LeadsContent() {
   const filteredLeads = useMemo(() => {
     return leads
       .filter((lead) => {
-        // Role permission check
-        if (
-          currentRole === "sales_rep" &&
-          lead.sales_owner_id &&
-          lead.sales_owner_id !== currentUser.id
-        ) {
-          return false;
+        // Role permission check: sales reps strictly only see their own assigned leads
+        if (currentRole === "sales_rep") {
+          const isOwner =
+            lead.sales_owner_id === currentUser.id ||
+            lead.sales_owner_name === currentUser.full_name;
+          if (!isOwner) return false;
         }
 
         // Search text
@@ -180,6 +179,48 @@ function LeadsContent() {
 
   return (
     <div className="space-y-4 sm:space-y-5">
+      {/* SALES REP DEDICATED BOOTH BANNER */}
+      {currentRole === "sales_rep" && (
+        <div className="p-4 sm:p-5 rounded-3xl glass-card border border-cyan-400/30 relative overflow-hidden space-y-3 shadow-xl">
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-cyan-400 via-falcon-500 to-emerald-400" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <img
+                src={
+                  currentUser.avatar_url ||
+                  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"
+                }
+                alt={currentUser.full_name}
+                className="w-12 h-12 rounded-2xl object-cover border-2 border-cyan-400/50 shadow-md"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-black text-white">
+                    {language === "ar"
+                      ? `بوابة المندوب الميداني: ${currentUser.full_name}`
+                      : `Sales Rep Portal: ${currentUser.full_name}`}
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                    {language === "ar" ? "عملاؤك فقط" : "Your Leads Only"}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  {language === "ar"
+                    ? `أنت تشاهد وتدير الآن قائمة عملائك المسجلين باسمك فقط (${filteredLeads.length} عميل). كل عميل تسجله يتم حفظه لحسابك الخاص.`
+                    : `Viewing your private customer prospects (${filteredLeads.length} leads). Any new lead captured is saved to your account.`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono font-bold px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-cyan-300">
+                {language === "ar" ? "إجمالي عملائك:" : "Your Total Leads:"} {filteredLeads.length}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1. TOP HEADER & EXPORT */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl glass-panel relative overflow-hidden">
         <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none" />

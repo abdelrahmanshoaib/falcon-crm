@@ -16,6 +16,10 @@ import {
   Check,
   Globe,
   Camera,
+  Copy,
+  MessageCircle,
+  KeyRound,
+  Sparkles,
 } from "lucide-react";
 
 interface AddEmployeeModalProps {
@@ -72,10 +76,14 @@ export function AddEmployeeModal({
   const [customAvatarInput, setCustomAvatarInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [createdProfile, setCreatedProfile] = useState<UserProfile | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const isEditMode = Boolean(initialData?.id);
 
   useEffect(() => {
+    setCreatedProfile(null);
+    setCopiedLink(false);
     if (initialData) {
       setFullName(initialData.full_name || "");
       setEmail(initialData.email || "");
@@ -149,7 +157,11 @@ export function AddEmployeeModal({
 
       if (saved) {
         onSaved(saved);
-        onClose();
+        if (!isEditMode) {
+          setCreatedProfile(saved);
+        } else {
+          onClose();
+        }
       } else {
         setErrorMsg(isAr ? "حدث خطأ أثناء حفظ بيانات الموظف" : "Failed to save employee profile.");
       }
@@ -210,16 +222,111 @@ export function AddEmployeeModal({
           </button>
         </div>
 
-        {/* Error message */}
-        {errorMsg && (
-          <div className="mt-4 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 flex-shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
+        {/* Modal Body: Success Link Screen OR Form */}
+        {createdProfile ? (
+          <div className="mt-5 text-center space-y-4 animate-fade-in">
+            <div className="relative mx-auto w-16 h-16">
+              <img
+                src={createdProfile.avatar_url || AVATAR_PRESETS[0].url}
+                alt={createdProfile.full_name}
+                className="w-16 h-16 rounded-full object-cover border-2 border-emerald-400 shadow-xl shadow-emerald-500/20"
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 text-black flex items-center justify-center shadow-md">
+                <Check className="w-3 h-3 stroke-[3]" />
+              </div>
+            </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-xs">
+            <div>
+              <h3 className="text-lg font-black text-white flex items-center justify-center gap-1.5">
+                <span>{isAr ? "تم إنشاء حساب الموظف بنجاح!" : "Employee Added Successfully!"}</span>
+                <Sparkles className="w-4 h-4 text-amber-400" />
+              </h3>
+              <p className="text-xs text-slate-300 mt-1">
+                {isAr
+                  ? `أصبح حساب "${createdProfile.full_name}" جاهزاً. يمكنك الآن مشاركة رابط الدخول المباشر معه.`
+                  : `Profile for "${createdProfile.full_name}" is active. Share the direct access link below.`}
+              </p>
+            </div>
+
+            {/* Direct Login Link Box */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-start space-y-2">
+              <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{isAr ? "رابط الدخول المباشر للموظف:" : "Direct Staff Login Link:"}</span>
+              </label>
+              <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 font-mono text-xs text-cyan-300 break-all select-all">
+                {`${typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"}/login?rep=${createdProfile.id}`}
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const link = `${typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"}/login?rep=${createdProfile.id}`;
+                  if (typeof navigator !== "undefined" && navigator.clipboard) {
+                    navigator.clipboard.writeText(link);
+                  }
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 2000);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+              >
+                {copiedLink ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span className="text-emerald-400">{isAr ? "تم نسخ الرابط!" : "Copied Link!"}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>{isAr ? "نسخ الرابط" : "Copy Link"}</span>
+                  </>
+                )}
+              </button>
+
+              {createdProfile.phone && (
+                <a
+                  href={`https://wa.me/${createdProfile.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                    isAr
+                      ? `مرحباً يا ${createdProfile.full_name} 👋\n\nإليك رابط دخولك المباشر لمنصة مبيعات ومعارض Falcon CNC:\n${
+                          typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"
+                        }/login?rep=${createdProfile.id}\n\nيمكنك من خلال هذا الرابط تسجيل العملاء بالمعرض ومتابعة صفقاتك بشكل منفصل.`
+                      : `Hello ${createdProfile.full_name},\n\nHere is your direct access link for Falcon CNC Exhibition CRM:\n${
+                          typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"
+                        }/login?rep=${createdProfile.id}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-400" />
+                  <span>{isAr ? "إرسال عبر واتساب" : "Send WhatsApp"}</span>
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full sm:w-auto py-2.5 px-6 rounded-xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white font-bold text-xs transition-all whitespace-nowrap"
+              >
+                {isAr ? "إتمام" : "Done"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Error message */}
+            {errorMsg && (
+              <div className="mt-4 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {/* Form Body */}
+            <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-xs">
           {/* 1. Full Name & Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
@@ -488,6 +595,8 @@ export function AddEmployeeModal({
             </button>
           </div>
         </form>
+      </>
+    )}
       </div>
     </div>
   );
