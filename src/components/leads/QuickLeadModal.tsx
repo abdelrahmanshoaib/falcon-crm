@@ -14,6 +14,9 @@ import {
   BudgetStatus,
   FactoryStatus,
   DecisionRole,
+  CityOption,
+  SectorOption,
+  RepLeadFormCustomization,
 } from "@/types/crm";
 import {
   X,
@@ -21,7 +24,6 @@ import {
   Phone,
   Building,
   User,
-  Cpu,
   Flame,
   ThermometerSun,
   Snowflake,
@@ -34,6 +36,7 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
+  Sliders,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/lib/utils";
 import { TemperatureBadge } from "../common/Badges";
@@ -52,10 +55,14 @@ export function QuickLeadModal({
   onActionSelect,
 }: QuickLeadModalProps) {
   const { t, language } = useLanguage();
+  const isAr = language === "ar";
   const { currentUser } = useAuth();
 
   const [machines, setMachines] = useState<Machine[]>([]);
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [sectors, setSectors] = useState<SectorOption[]>([]);
+  const [customization, setCustomization] = useState<RepLeadFormCustomization | null>(null);
 
   // Form State
   const [fullName, setFullName] = useState("");
@@ -72,7 +79,7 @@ export function QuickLeadModal({
   // Progressive Disclosure (Full Details)
   const [showFullDetails, setShowFullDetails] = useState(false);
   const [factoryStatus, setFactoryStatus] = useState<FactoryStatus>("yes");
-  const [businessSector, setBusinessSector] = useState("Furniture Manufacturing");
+  const [businessSector, setBusinessSector] = useState("Furniture & Millwork");
   const [purchaseIntent, setPurchaseIntent] = useState<PurchaseIntent>("ready_to_buy");
   const [purchaseTimeline, setPurchaseTimeline] = useState<PurchaseTimeline>("within_30_days");
   const [budgetStatus, setBudgetStatus] = useState<BudgetStatus>("budget_available");
@@ -87,18 +94,67 @@ export function QuickLeadModal({
   const [savedLead, setSavedLead] = useState<Lead | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Load dynamic data & rep customization on open
   useEffect(() => {
     if (isOpen) {
-      db.getMachines().then((list) => {
-        setMachines(list);
-        if (list.length > 0 && !selectedMachine) setSelectedMachine(list[0].name);
-      });
-      db.getExhibitions().then((list) => {
-        setExhibitions(list);
-        if (list.length > 0) setExhibitionId(list[0].id);
+      Promise.all([
+        db.getMachines(),
+        db.getExhibitions(),
+        db.getCities(),
+        db.getSectors(),
+        currentUser?.id ? db.getRepCustomization(currentUser.id) : Promise.resolve(null),
+      ]).then(([machList, exhList, cityList, secList, repCustom]) => {
+        setMachines(machList);
+        setExhibitions(exhList);
+        const activeCities = cityList.filter((c) => c.is_active);
+        const activeSectors = secList.filter((s) => s.is_active);
+        setCities(activeCities);
+        setSectors(activeSectors);
+        setCustomization(repCustom);
+
+        if (exhList.length > 0 && !exhibitionId) {
+          setExhibitionId(exhList[0].id);
+        }
+
+        // Apply employee-specific defaults
+        if (repCustom) {
+          if (repCustom.default_machine_name) {
+            setSelectedMachine(repCustom.default_machine_name);
+          } else if (machList.length > 0) {
+            setSelectedMachine(machList[0].name);
+          }
+
+          if (repCustom.default_city) {
+            setCity(repCustom.default_city);
+          } else if (activeCities.length > 0) {
+            setCity(activeCities[0].name_en);
+          }
+
+          if (repCustom.default_temperature) {
+            setTemperature(repCustom.default_temperature);
+          }
+
+          if (repCustom.default_sector) {
+            setBusinessSector(repCustom.default_sector);
+          } else if (activeSectors.length > 0) {
+            setBusinessSector(activeSectors[0].name_en);
+          }
+
+          setShowFullDetails(repCustom.default_form_mode === "full");
+        } else {
+          if (machList.length > 0 && !selectedMachine) {
+            setSelectedMachine(machList[0].name);
+          }
+          if (activeCities.length > 0) {
+            setCity(activeCities[0].name_en);
+          }
+          if (activeSectors.length > 0) {
+            setBusinessSector(activeSectors[0].name_en);
+          }
+        }
       });
     }
-  }, [isOpen]);
+  }, [isOpen, currentUser?.id]);
 
   // Real-time duplicate phone checking on blur or phone length >= 9
   const handlePhoneChange = async (val: string) => {
@@ -125,7 +181,17 @@ export function QuickLeadModal({
     setDuplicateLead(null);
     setBypassDuplicate(false);
     setSavedLead(null);
-    setShowFullDetails(false);
+
+    // Reapply rep defaults
+    if (customization) {
+      if (customization.default_machine_name) setSelectedMachine(customization.default_machine_name);
+      if (customization.default_city) setCity(customization.default_city);
+      if (customization.default_temperature) setTemperature(customization.default_temperature);
+      if (customization.default_sector) setBusinessSector(customization.default_sector);
+      setShowFullDetails(customization.default_form_mode === "full");
+    } else {
+      setShowFullDetails(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -138,15 +204,15 @@ export function QuickLeadModal({
 
     setIsSaving(true);
     try {
-      const activeExhibition = exhibitions.find((e) => e.id === exhibitionId);
+      const activeExhibition = exhibitions.find((e) => e.id === exhibitionId) || exhibitions[0];
 
       const leadData: Partial<Lead> = {
         full_name: fullName.trim(),
         phone: phone.trim(),
-        company_name: companyName.trim(),
+        company_name: companyName.trim() || undefined,
         email: email.trim() || undefined,
+        city: city || "Damietta",
         job_title: jobTitle.trim() || undefined,
-        city: city || "Cairo",
         business_sector: businessSector,
         interested_machine_names: selectedMachine ? [selectedMachine] : [],
         temperature: temperature,
@@ -176,6 +242,15 @@ export function QuickLeadModal({
   };
 
   if (!isOpen) return null;
+
+  // Customization visibility flags (default to true if no customization object exists)
+  const showCompanyField = customization?.show_company_name ?? true;
+  const showCityField = customization?.show_city ?? true;
+  const showMachineField = customization?.show_interested_machine ?? true;
+  const showTempField = customization?.show_temperature ?? true;
+  const showNotesField = customization?.show_quick_notes ?? true;
+  const showQualSection = customization?.show_qualification_section ?? true;
+  const quickPresets = customization?.quick_note_presets || [];
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
@@ -212,6 +287,11 @@ export function QuickLeadModal({
                 <span className="text-xs text-slate-400 font-mono">
                   {savedLead.interested_machine_names?.[0]}
                 </span>
+                {savedLead.city && (
+                  <span className="text-xs text-slate-400 font-mono">
+                    • {savedLead.city}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -316,8 +396,8 @@ export function QuickLeadModal({
               </button>
             </div>
 
-            {/* Sales Rep Attribution Bar */}
-            <div className="mx-4 mt-3 px-3.5 py-2 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2 text-xs">
+            {/* Sales Rep Attribution Bar & Customization Indicator */}
+            <div className="mx-4 mt-3 px-3.5 py-2 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
                 <img
                   src={
@@ -332,9 +412,18 @@ export function QuickLeadModal({
                   <strong className="text-white font-bold">{currentUser.full_name}</strong>
                 </span>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 font-semibold">
-                {language === "ar" ? "تسجيل منفصل" : "Isolated Record"}
-              </span>
+
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {customization && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 font-semibold flex items-center gap-1">
+                    <Sliders className="w-2.5 h-2.5" />
+                    <span>{language === "ar" ? "واجهة مخصصة لك" : "Custom Layout"}</span>
+                  </span>
+                )}
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 font-semibold">
+                  {language === "ar" ? "تسجيل منفصل" : "Isolated Record"}
+                </span>
+              </div>
             </div>
 
             {/* DUPLICATE WARNING BANNER */}
@@ -436,216 +525,306 @@ export function QuickLeadModal({
                 </div>
               </div>
 
-              {/* 3. Company Name & City */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    {t("field_company")}
-                  </label>
-                  <div className="relative">
-                    <Building className="w-4 h-4 text-slate-400 absolute left-3 rtl:left-auto rtl:right-3 top-3 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder={t("field_company_placeholder")}
-                      className="w-full glass-input rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2.5 text-xs text-white focus:outline-none placeholder-slate-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    {t("field_city")}
-                  </label>
-                  <select
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
-                  >
-                    <option value="Damietta" className="bg-slate-900">Damietta (دمياط)</option>
-                    <option value="10th of Ramadan" className="bg-slate-900">10th of Ramadan (العاشر من رمضان)</option>
-                    <option value="6th of October" className="bg-slate-900">6th of October (السادس من أكتوبر)</option>
-                    <option value="Cairo" className="bg-slate-900">Cairo (القاهرة)</option>
-                    <option value="Alexandria" className="bg-slate-900">Alexandria (الإسكندرية)</option>
-                    <option value="Sadat City" className="bg-slate-900">Sadat City (مدينة السادات)</option>
-                    <option value="Obour" className="bg-slate-900">Obour City (العبور)</option>
-                    <option value="Giza" className="bg-slate-900">Giza (الجيزة)</option>
-                    <option value="Other" className="bg-slate-900">Other Region</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* 4. Interested Machine & Temperature */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    {t("field_machine_interest")}
-                  </label>
-                  <select
-                    value={selectedMachine}
-                    onChange={(e) => setSelectedMachine(e.target.value)}
-                    className="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
-                  >
-                    {machines.map((m) => (
-                      <option key={m.id} value={m.name} className="bg-slate-900">
-                        {m.name} ({m.category})
-                      </option>
-                    ))}
-                    <option value="Other Machine" className="bg-slate-900">Other Custom Machine</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    {t("field_temperature")}
-                  </label>
-                  <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
-                    <button
-                      type="button"
-                      onClick={() => setTemperature("HOT")}
-                      className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                        temperature === "HOT"
-                          ? "bg-red-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.5)] border border-red-400"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      <Flame className="w-3.5 h-3.5 text-white" />
-                      <span>HOT</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setTemperature("WARM")}
-                      className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                        temperature === "WARM"
-                          ? "bg-amber-500 text-slate-950 shadow-[0_0_12px_rgba(245,158,11,0.5)] border border-amber-300"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      <ThermometerSun className="w-3.5 h-3.5" />
-                      <span>WARM</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setTemperature("COLD")}
-                      className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                        temperature === "COLD"
-                          ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.5)] border border-cyan-300"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      <Snowflake className="w-3.5 h-3.5" />
-                      <span>COLD</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* 5. Notes */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  {t("field_quick_notes")}
-                </label>
-                <textarea
-                  rows={2}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder={t("field_quick_notes_placeholder")}
-                  className="w-full glass-input rounded-xl p-3 text-xs text-white focus:outline-none placeholder-slate-500"
-                />
-              </div>
-
-              {/* PROGRESSIVE DISCLOSURE - FULL QUALIFICATION DETAILS */}
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={() => setShowFullDetails(!showFullDetails)}
-                  className="flex items-center justify-between w-full py-2 px-3 rounded-xl glass-pill text-xs font-semibold text-cyan-300 transition-all"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    {showFullDetails ? "Hide In-Depth Qualification" : "Add In-Depth B2B Qualification (Optional)"}
-                  </span>
-                  {showFullDetails ? (
-                    <ChevronUp className="w-4 h-4" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4" />
-                  )}
-                </button>
-
-                {showFullDetails && (
-                  <div className="mt-3 p-3.5 rounded-2xl glass-card space-y-3 animate-in fade-in duration-200 text-xs">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-slate-400 mb-1 font-medium">
-                          {t("q_factory_status")}
-                        </label>
-                        <select
-                          value={factoryStatus}
-                          onChange={(e) => setFactoryStatus(e.target.value as FactoryStatus)}
-                          className="w-full glass-input rounded-lg p-2 text-white"
-                        >
-                          <option value="yes" className="bg-slate-900">{t("q_factory_yes")}</option>
-                          <option value="under_construction" className="bg-slate-900">{t("q_factory_construction")}</option>
-                          <option value="planning" className="bg-slate-900">{t("q_factory_planning")}</option>
-                          <option value="no" className="bg-slate-900">{t("q_factory_no")}</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-400 mb-1 font-medium">
-                          {t("q_purchase_intent")}
-                        </label>
-                        <select
-                          value={purchaseIntent}
-                          onChange={(e) => setPurchaseIntent(e.target.value as PurchaseIntent)}
-                          className="w-full glass-input rounded-lg p-2 text-white"
-                        >
-                          <option value="ready_to_buy" className="bg-slate-900">{t("q_intent_ready")}</option>
-                          <option value="comparing" className="bg-slate-900">{t("q_intent_comparing")}</option>
-                          <option value="future_planning" className="bg-slate-900">{t("q_intent_future")}</option>
-                          <option value="browsing" className="bg-slate-900">{t("q_intent_general")}</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-400 mb-1 font-medium">
-                          {t("q_purchase_timeline")}
-                        </label>
-                        <select
-                          value={purchaseTimeline}
-                          onChange={(e) => setPurchaseTimeline(e.target.value as PurchaseTimeline)}
-                          className="w-full glass-input rounded-lg p-2 text-white"
-                        >
-                          <option value="within_30_days" className="bg-slate-900">{t("q_timeline_30d")}</option>
-                          <option value="1_to_3_months" className="bg-slate-900">{t("q_timeline_1_3m")}</option>
-                          <option value="3_to_6_months" className="bg-slate-900">{t("q_timeline_3_6m")}</option>
-                          <option value="more_than_6_months" className="bg-slate-900">{t("q_timeline_6_12m")}</option>
-                          <option value="unknown" className="bg-slate-900">{t("q_timeline_unknown")}</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-400 mb-1 font-medium">
-                          {t("q_budget_status")}
-                        </label>
-                        <select
-                          value={budgetStatus}
-                          onChange={(e) => setBudgetStatus(e.target.value as BudgetStatus)}
-                          className="w-full glass-input rounded-lg p-2 text-white"
-                        >
-                          <option value="budget_available" className="bg-slate-900">{t("q_budget_available")}</option>
-                          <option value="financing_needed" className="bg-slate-900">{t("q_budget_financing")}</option>
-                          <option value="budget_not_defined" className="bg-slate-900">{t("q_budget_undefined")}</option>
-                          <option value="not_discussed" className="bg-slate-900">{t("q_budget_not_discussed")}</option>
-                        </select>
+              {/* 3. Company Name & City (Configurable visibility per rep) */}
+              {(showCompanyField || showCityField) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {showCompanyField && (
+                    <div className={!showCityField ? "sm:col-span-2" : ""}>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        {t("field_company")}
+                      </label>
+                      <div className="relative">
+                        <Building className="w-4 h-4 text-slate-400 absolute left-3 rtl:left-auto rtl:right-3 top-3 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          placeholder={t("field_company_placeholder")}
+                          className="w-full glass-input rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2.5 text-xs text-white focus:outline-none placeholder-slate-500"
+                        />
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+
+                  {showCityField && (
+                    <div className={!showCompanyField ? "sm:col-span-2" : ""}>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                        <span>{t("field_city")}</span>
+                        {customization?.default_city === city && (
+                          <span className="text-[10px] text-cyan-300 font-mono">{isAr ? "افتراضي لك" : "Default"}</span>
+                        )}
+                      </label>
+                      <select
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none bg-[#090f20]"
+                      >
+                        {cities.length > 0 ? (
+                          cities.map((c) => (
+                            <option key={c.id} value={c.name_en} className="bg-slate-900">
+                              {isAr ? `${c.name_ar} (${c.name_en})` : `${c.name_en} (${c.name_ar})`}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="Damietta" className="bg-slate-900">Damietta (دمياط)</option>
+                        )}
+                        <option value="Other" className="bg-slate-900">{isAr ? "منطقة أخرى" : "Other Region"}</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 4. Interested Machine & Temperature (Configurable visibility per rep) */}
+              {(showMachineField || showTempField) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {showMachineField && (
+                    <div className={!showTempField ? "sm:col-span-2" : ""}>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                        <span>{t("field_machine_interest")}</span>
+                        {customization?.default_machine_name === selectedMachine && (
+                          <span className="text-[10px] text-cyan-300 font-mono">{isAr ? "تخصصك" : "Assigned"}</span>
+                        )}
+                      </label>
+                      <select
+                        value={selectedMachine}
+                        onChange={(e) => setSelectedMachine(e.target.value)}
+                        className="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none bg-[#090f20]"
+                      >
+                        {machines
+                          .filter((m) => m.is_active)
+                          .map((m) => (
+                            <option key={m.id} value={m.name} className="bg-slate-900">
+                              {m.name} ({m.category})
+                            </option>
+                          ))}
+                        <option value="Other Machine" className="bg-slate-900">
+                          {isAr ? "ماكينة مخصصة أخرى" : "Other Custom Machine"}
+                        </option>
+                      </select>
+                    </div>
+                  )}
+
+                  {showTempField && (
+                    <div className={!showMachineField ? "sm:col-span-2" : ""}>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        {t("field_temperature")}
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setTemperature("HOT")}
+                          className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                            temperature === "HOT"
+                              ? "bg-red-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.5)] border border-red-400"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          <Flame className="w-3.5 h-3.5 text-white" />
+                          <span>HOT</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setTemperature("WARM")}
+                          className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                            temperature === "WARM"
+                              ? "bg-amber-500 text-slate-950 shadow-[0_0_12px_rgba(245,158,11,0.5)] border border-amber-300"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          <ThermometerSun className="w-3.5 h-3.5" />
+                          <span>WARM</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setTemperature("COLD")}
+                          className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                            temperature === "COLD"
+                              ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.5)] border border-cyan-300"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          <Snowflake className="w-3.5 h-3.5" />
+                          <span>COLD</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 5. Notes & Rep Quick Presets Chips */}
+              {showNotesField && (
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    {t("field_quick_notes")}
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder={t("field_quick_notes_placeholder")}
+                    className="w-full glass-input rounded-xl p-3 text-xs text-white focus:outline-none placeholder-slate-500"
+                  />
+
+                  {/* Rep Presets Chips (One-Click Insert) */}
+                  {quickPresets.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      <span className="text-[10px] text-cyan-300 font-semibold flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-400" />
+                        <span>{isAr ? "ملاحظات سريعة جاهزة:" : "Quick Presets:"}</span>
+                      </span>
+                      {quickPresets.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() =>
+                            setNotes((prev) => (prev.trim() ? `${prev.trim()} • ${preset}` : preset))
+                          }
+                          className="px-2.5 py-1 rounded-xl text-[10px] font-medium bg-white/[0.04] hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-200 border border-white/10 hover:border-cyan-400/40 transition-all active:scale-95 shadow-sm"
+                        >
+                          + {preset}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* PROGRESSIVE DISCLOSURE - FULL QUALIFICATION DETAILS */}
+              {showQualSection && (
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowFullDetails(!showFullDetails)}
+                    className="flex items-center justify-between w-full py-2 px-3 rounded-xl glass-pill text-xs font-semibold text-cyan-300 transition-all"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      {showFullDetails
+                        ? (isAr ? "إخفاء الاستبيان التفصيلي" : "Hide In-Depth Qualification")
+                        : (isAr ? "إضافة استبيان التأهيل B2B والمصنع (اختياري)" : "Add In-Depth B2B Qualification (Optional)")}
+                    </span>
+                    {showFullDetails ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+
+                  {showFullDetails && (
+                    <div className="mt-3 p-3.5 rounded-2xl glass-card space-y-3 animate-in fade-in duration-200 text-xs">
+                      {/* Business Sector & Factory Status */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-slate-400 mb-1 font-medium">
+                            {isAr ? "قطاع النشاط والصناعة" : "Business Sector"}
+                          </label>
+                          <select
+                            value={businessSector}
+                            onChange={(e) => setBusinessSector(e.target.value)}
+                            className="w-full glass-input rounded-lg p-2 text-white bg-slate-900"
+                          >
+                            {sectors.length > 0 ? (
+                              sectors.map((sec) => (
+                                <option key={sec.id} value={sec.name_en} className="bg-slate-900">
+                                  {isAr ? sec.name_ar : sec.name_en}
+                                </option>
+                              ))
+                            ) : (
+                              <option value="Furniture & Millwork">Furniture & Millwork</option>
+                            )}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-slate-400 mb-1 font-medium">
+                            {t("q_factory_status")}
+                          </label>
+                          <select
+                            value={factoryStatus}
+                            onChange={(e) => setFactoryStatus(e.target.value as FactoryStatus)}
+                            className="w-full glass-input rounded-lg p-2 text-white bg-slate-900"
+                          >
+                            <option value="yes" className="bg-slate-900">{t("q_factory_yes")}</option>
+                            <option value="under_construction" className="bg-slate-900">{t("q_factory_construction")}</option>
+                            <option value="planning" className="bg-slate-900">{t("q_factory_planning")}</option>
+                            <option value="no" className="bg-slate-900">{t("q_factory_no")}</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-slate-400 mb-1 font-medium">
+                            {t("q_purchase_intent")}
+                          </label>
+                          <select
+                            value={purchaseIntent}
+                            onChange={(e) => setPurchaseIntent(e.target.value as PurchaseIntent)}
+                            className="w-full glass-input rounded-lg p-2 text-white bg-slate-900"
+                          >
+                            <option value="ready_to_buy" className="bg-slate-900">{t("q_intent_ready")}</option>
+                            <option value="comparing" className="bg-slate-900">{t("q_intent_comparing")}</option>
+                            <option value="future_planning" className="bg-slate-900">{t("q_intent_future")}</option>
+                            <option value="browsing" className="bg-slate-900">{t("q_intent_general")}</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-slate-400 mb-1 font-medium">
+                            {t("q_purchase_timeline")}
+                          </label>
+                          <select
+                            value={purchaseTimeline}
+                            onChange={(e) => setPurchaseTimeline(e.target.value as PurchaseTimeline)}
+                            className="w-full glass-input rounded-lg p-2 text-white bg-slate-900"
+                          >
+                            <option value="within_30_days" className="bg-slate-900">{t("q_timeline_30d")}</option>
+                            <option value="1_to_3_months" className="bg-slate-900">{t("q_timeline_1_3m")}</option>
+                            <option value="3_to_6_months" className="bg-slate-900">{t("q_timeline_3_6m")}</option>
+                            <option value="more_than_6_months" className="bg-slate-900">{t("q_timeline_6_12m")}</option>
+                            <option value="unknown" className="bg-slate-900">{t("q_timeline_unknown")}</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-slate-400 mb-1 font-medium">
+                            {t("q_budget_status")}
+                          </label>
+                          <select
+                            value={budgetStatus}
+                            onChange={(e) => setBudgetStatus(e.target.value as BudgetStatus)}
+                            className="w-full glass-input rounded-lg p-2 text-white bg-slate-900"
+                          >
+                            <option value="budget_available" className="bg-slate-900">{t("q_budget_available")}</option>
+                            <option value="financing_needed" className="bg-slate-900">{t("q_budget_financing")}</option>
+                            <option value="budget_not_defined" className="bg-slate-900">{t("q_budget_undefined")}</option>
+                            <option value="not_discussed" className="bg-slate-900">{t("q_budget_not_discussed")}</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-slate-400 mb-1 font-medium">
+                            {language === "ar" ? "الصفة وصلاحية القرار" : "Decision Role"}
+                          </label>
+                          <select
+                            value={decisionRole}
+                            onChange={(e) => setDecisionRole(e.target.value as DecisionRole)}
+                            className="w-full glass-input rounded-lg p-2 text-white bg-slate-900"
+                          >
+                            <option value="owner" className="bg-slate-900">{language === "ar" ? "صاحب العمل / المالك" : "Owner"}</option>
+                            <option value="decision_maker" className="bg-slate-900">{language === "ar" ? "متخذ القرار الرئيسي" : "Decision Maker"}</option>
+                            <option value="technical_evaluator" className="bg-slate-900">{language === "ar" ? "مهندس تقني وفني" : "Technical Evaluator"}</option>
+                            <option value="purchasing_manager" className="bg-slate-900">{language === "ar" ? "مدير مشتريات" : "Purchasing Manager"}</option>
+                            <option value="influencer" className="bg-slate-900">{language === "ar" ? "مؤثر في الشراء" : "Influencer"}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Modal Footer with Save Lead Action */}

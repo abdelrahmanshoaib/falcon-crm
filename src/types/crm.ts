@@ -96,6 +96,42 @@ export interface Machine {
   is_active: boolean;
 }
 
+export interface CityOption {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  is_active: boolean;
+}
+
+export interface SectorOption {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  is_active: boolean;
+}
+
+export interface RepLeadFormCustomization {
+  rep_id: string;
+  default_machine_name?: string;
+  default_city?: string;
+  default_temperature?: LeadTemperature;
+  default_sector?: string;
+
+  // Field visibility toggles for this employee
+  show_company_name: boolean;
+  show_city: boolean;
+  show_interested_machine: boolean;
+  show_temperature: boolean;
+  show_quick_notes: boolean;
+  show_qualification_section: boolean;
+
+  // Quick mode default
+  default_form_mode: "compact" | "full";
+
+  // Custom quick note chips presets
+  quick_note_presets: string[];
+}
+
 export interface SalesMagnet {
   id: string;
   title: string;

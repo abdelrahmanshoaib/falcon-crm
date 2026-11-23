@@ -10,6 +10,9 @@ import {
   LeadActivity,
   LeadNote,
   AppNotification,
+  CityOption,
+  SectorOption,
+  RepLeadFormCustomization,
 } from "@/types/crm";
 
 export const initialProfiles: UserProfile[] = [
@@ -626,3 +629,98 @@ export const initialNotifications: AppNotification[] = [
     created_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
   },
 ];
+
+export const initialCities: CityOption[] = [
+  { id: "c-1", name_en: "Damietta", name_ar: "دمياط", is_active: true },
+  { id: "c-2", name_en: "10th of Ramadan", name_ar: "العاشر من رمضان", is_active: true },
+  { id: "c-3", name_en: "6th of October", name_ar: "السادس من أكتوبر", is_active: true },
+  { id: "c-4", name_en: "Cairo", name_ar: "القاهرة", is_active: true },
+  { id: "c-5", name_en: "Alexandria", name_ar: "الإسكندرية", is_active: true },
+  { id: "c-6", name_en: "Giza", name_ar: "الجيزة", is_active: true },
+  { id: "c-7", name_en: "Sadat City", name_ar: "مدينة السادات", is_active: true },
+  { id: "c-8", name_en: "Obour City", name_ar: "مدينة العبور", is_active: true },
+  { id: "c-9", name_en: "Mansoura", name_ar: "المنصورة / الدقهلية", is_active: true },
+  { id: "c-10", name_en: "Tanta", name_ar: "طنطا / الغربية", is_active: true },
+  { id: "c-11", name_en: "Port Said", name_ar: "بورسعيد", is_active: true },
+  { id: "c-12", name_en: "Suez", name_ar: "السويس", is_active: true },
+  { id: "c-13", name_en: "Asyut", name_ar: "أسيوط", is_active: true },
+  { id: "c-14", name_en: "Sohag", name_ar: "سوهاج", is_active: true },
+  { id: "c-15", name_en: "Riyadh", name_ar: "الرياض (السعودية)", is_active: true },
+  { id: "c-16", name_en: "Jeddah", name_ar: "جدة (السعودية)", is_active: true },
+  { id: "c-17", name_en: "Other", name_ar: "منطقة / محافظة أخرى", is_active: true },
+];
+
+export const initialSectors: SectorOption[] = [
+  { id: "sec-1", name_en: "Furniture & Millwork", name_ar: "صناعة أثاث وموبيليا خشبية", is_active: true },
+  { id: "sec-2", name_en: "Kitchens & Interior Wood", name_ar: "مطابخ وديكورات خشبية", is_active: true },
+  { id: "sec-3", name_en: "Signage & Cladding Facades", name_ar: "واجهات كلادينج ودعاية وإعلان", is_active: true },
+  { id: "sec-4", name_en: "Sheet Metal & Steel Works", name_ar: "تشغيل معادن وتشكيل صاج", is_active: true },
+  { id: "sec-5", name_en: "Doors & Architectural Wood", name_ar: "تصنيع أبواب مصفحة وشبابيك", is_active: true },
+  { id: "sec-6", name_en: "Acrylic & Laser Arts", name_ar: "أعمال أكريليك وديكورات ليزر", is_active: true },
+  { id: "sec-7", name_en: "Fit-Out & Contracting", name_ar: "مقاولات وتشطيبات متكاملة", is_active: true },
+];
+
+export const initialRepCustomizations: Record<string, RepLeadFormCustomization> = {
+  // Mohamed Ibrahim (Wood CNC Router Specialist in Damietta)
+  "a0000000-0000-0000-0000-000000000003": {
+    rep_id: "a0000000-0000-0000-0000-000000000003",
+    default_machine_name: "Falcon Pro-Router 1325",
+    default_city: "Damietta",
+    default_temperature: "HOT",
+    default_sector: "Furniture & Millwork",
+    show_company_name: true,
+    show_city: true,
+    show_interested_machine: true,
+    show_temperature: true,
+    show_quick_notes: true,
+    show_qualification_section: true,
+    default_form_mode: "compact",
+    quick_note_presets: [
+      "مهتم بالتقسيط المباشر 12 شهر",
+      "يحتاج معاينة في مصنع دمياط",
+      "طلب زيارة الجناح غداً للمقارنة",
+      "جاهز للتعاقد الفوري في المعرض",
+    ],
+  },
+  // Omar Khaled (Fiber Laser & Plasma Specialist in 10th of Ramadan / Cairo)
+  "a0000000-0000-0000-0000-000000000004": {
+    rep_id: "a0000000-0000-0000-0000-000000000004",
+    default_machine_name: "Falcon Fiber-Cut 3015",
+    default_city: "10th of Ramadan",
+    default_temperature: "HOT",
+    default_sector: "Sheet Metal & Steel Works",
+    show_company_name: true,
+    show_city: true,
+    show_interested_machine: true,
+    show_temperature: true,
+    show_quick_notes: true,
+    show_qualification_section: true,
+    default_form_mode: "compact",
+    quick_note_presets: [
+      "مطلوب ليزر فايبر 3000W لتقطيع صاج",
+      "مطلوب عرض سعر فني ورسومات عينات",
+      "عنده خط إنتاج قائم للتوسعة",
+      "تنسيق مكالمة فنية مع مهندس الصيانة",
+    ],
+  },
+  // Mahmoud Ali (ATC Master & Edge Bander Specialist)
+  "a0000000-0000-0000-0000-000000000005": {
+    rep_id: "a0000000-0000-0000-0000-000000000005",
+    default_machine_name: "Falcon ATC-Master 2030",
+    default_city: "Cairo",
+    default_temperature: "WARM",
+    default_sector: "Kitchens & Interior Wood",
+    show_company_name: true,
+    show_city: true,
+    show_interested_machine: true,
+    show_temperature: true,
+    show_quick_notes: true,
+    show_qualification_section: true,
+    default_form_mode: "compact",
+    quick_note_presets: [
+      "يريد روتر مغير أوتوماتيك 12 بنطة",
+      "طلب كتالوج كامل وفيديو تشغيل",
+      "متابعة بعد انتهاء المعرض",
+    ],
+  },
+};

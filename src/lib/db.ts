@@ -10,6 +10,9 @@ import {
   LeadNote,
   LeadActivity,
   AppNotification,
+  CityOption,
+  SectorOption,
+  RepLeadFormCustomization,
 } from "@/types/crm";
 import { isSupabaseConfigured, supabase } from "./supabase";
 import {
@@ -24,6 +27,9 @@ import {
   initialActivities,
   initialQRCampaigns,
   initialNotifications,
+  initialCities,
+  initialSectors,
+  initialRepCustomizations,
 } from "./seed-data";
 import { normalizePhoneNumber } from "./utils";
 import { calculateLeadScore } from "./scoring";
@@ -42,6 +48,9 @@ const STORAGE_KEYS = {
   ACTIVITIES: "falcon_activities_store",
   NOTIFICATIONS: "falcon_notifications_store",
   OFFLINE_QUEUE: "falcon_offline_leads_queue",
+  CITIES: "falcon_cities_store",
+  SECTORS: "falcon_sectors_store",
+  REP_CUSTOMIZATIONS: "falcon_rep_customizations_store",
 };
 
 function getFromStorage<T>(key: string, defaultValue: T): T {
@@ -84,6 +93,9 @@ export const db = {
     localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
     localStorage.removeItem(STORAGE_KEYS.PROFILES);
     localStorage.removeItem(STORAGE_KEYS.OFFLINE_QUEUE);
+    localStorage.removeItem(STORAGE_KEYS.CITIES);
+    localStorage.removeItem(STORAGE_KEYS.SECTORS);
+    localStorage.removeItem(STORAGE_KEYS.REP_CUSTOMIZATIONS);
     window.location.reload();
   },
 
@@ -420,10 +432,58 @@ export const db = {
   // 4. MACHINES
   async getMachines(): Promise<Machine[]> {
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase.from("machines").select("*").eq("is_active", true);
+      const { data, error } = await supabase.from("machines").select("*").order("name");
       if (!error && data) return data as Machine[];
     }
     return getFromStorage<Machine[]>(STORAGE_KEYS.MACHINES, initialMachines);
+  },
+
+  async createMachine(machineData: Omit<Machine, "id">): Promise<Machine> {
+    const newMachine: Machine = {
+      ...machineData,
+      id:
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `m-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    };
+
+    if (isSupabaseConfigured() && supabase) {
+      const { data, error } = await supabase.from("machines").insert([newMachine]).select().single();
+      if (!error && data) return data as Machine;
+    }
+
+    const currentMachines = getFromStorage<Machine[]>(STORAGE_KEYS.MACHINES, initialMachines);
+    const updated = [newMachine, ...currentMachines];
+    saveToStorage(STORAGE_KEYS.MACHINES, updated);
+    return newMachine;
+  },
+
+  async updateMachine(id: string, updates: Partial<Machine>): Promise<Machine | null> {
+    if (isSupabaseConfigured() && supabase) {
+      const { data, error } = await supabase.from("machines").update(updates).eq("id", id).select().single();
+      if (!error && data) return data as Machine;
+    }
+
+    const currentMachines = getFromStorage<Machine[]>(STORAGE_KEYS.MACHINES, initialMachines);
+    const idx = currentMachines.findIndex((m) => m.id === id);
+    if (idx === -1) return null;
+
+    const updated = { ...currentMachines[idx], ...updates };
+    currentMachines[idx] = updated;
+    saveToStorage(STORAGE_KEYS.MACHINES, currentMachines);
+    return updated;
+  },
+
+  async deleteMachine(id: string): Promise<boolean> {
+    if (isSupabaseConfigured() && supabase) {
+      const { error } = await supabase.from("machines").delete().eq("id", id);
+      if (error) return false;
+    }
+
+    const currentMachines = getFromStorage<Machine[]>(STORAGE_KEYS.MACHINES, initialMachines);
+    const filtered = currentMachines.filter((m) => m.id !== id);
+    saveToStorage(STORAGE_KEYS.MACHINES, filtered);
+    return true;
   },
 
   // 5. SALES MAGNETS
@@ -641,5 +701,48 @@ export const db = {
       item.is_read = true;
       saveToStorage(STORAGE_KEYS.NOTIFICATIONS, list);
     }
+  },
+
+  // 10. CITIES & REGIONS
+  async getCities(): Promise<CityOption[]> {
+    return getFromStorage<CityOption[]>(STORAGE_KEYS.CITIES, initialCities);
+  },
+
+  async saveCities(cities: CityOption[]): Promise<CityOption[]> {
+    saveToStorage(STORAGE_KEYS.CITIES, cities);
+    return cities;
+  },
+
+  // 11. BUSINESS SECTORS
+  async getSectors(): Promise<SectorOption[]> {
+    return getFromStorage<SectorOption[]>(STORAGE_KEYS.SECTORS, initialSectors);
+  },
+
+  async saveSectors(sectors: SectorOption[]): Promise<SectorOption[]> {
+    saveToStorage(STORAGE_KEYS.SECTORS, sectors);
+    return sectors;
+  },
+
+  // 12. REP FORM CUSTOMIZATION
+  async getAllRepCustomizations(): Promise<Record<string, RepLeadFormCustomization>> {
+    return getFromStorage<Record<string, RepLeadFormCustomization>>(
+      STORAGE_KEYS.REP_CUSTOMIZATIONS,
+      initialRepCustomizations
+    );
+  },
+
+  async getRepCustomization(repId: string): Promise<RepLeadFormCustomization | null> {
+    const all = await this.getAllRepCustomizations();
+    return all[repId] || null;
+  },
+
+  async saveRepCustomization(
+    repId: string,
+    custom: RepLeadFormCustomization
+  ): Promise<RepLeadFormCustomization> {
+    const all = await this.getAllRepCustomizations();
+    all[repId] = custom;
+    saveToStorage(STORAGE_KEYS.REP_CUSTOMIZATIONS, all);
+    return custom;
   },
 };
