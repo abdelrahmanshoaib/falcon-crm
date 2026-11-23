@@ -20,6 +20,10 @@ import {
   MessageCircle,
   KeyRound,
   Sparkles,
+  Lock,
+  Eye,
+  EyeOff,
+  AtSign,
 } from "lucide-react";
 
 interface AddEmployeeModalProps {
@@ -67,6 +71,9 @@ export function AddEmployeeModal({
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("123456");
+  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<UserRole>("sales_rep");
   const [preferredLanguage, setPreferredLanguage] = useState<"en" | "ar">("ar");
@@ -87,6 +94,8 @@ export function AddEmployeeModal({
     if (initialData) {
       setFullName(initialData.full_name || "");
       setEmail(initialData.email || "");
+      setUsername(initialData.username || initialData.email?.split("@")[0] || "");
+      setPassword(initialData.password || "123456");
       setPhone(initialData.phone || "");
       setRole(initialData.role || "sales_rep");
       setPreferredLanguage(initialData.preferred_language || "ar");
@@ -99,6 +108,8 @@ export function AddEmployeeModal({
     } else {
       setFullName("");
       setEmail("");
+      setUsername("");
+      setPassword("123456");
       setPhone("");
       setRole("sales_rep");
       setPreferredLanguage(isAr ? "ar" : "en");
@@ -129,6 +140,10 @@ export function AddEmployeeModal({
       ? customAvatarInput.trim()
       : avatarUrl;
 
+    const finalUsername =
+      username.trim().toLowerCase() || email.trim().toLowerCase().split("@")[0];
+    const finalPassword = password.trim() || "123456";
+
     try {
       setIsSubmitting(true);
       let saved: UserProfile | null = null;
@@ -137,6 +152,8 @@ export function AddEmployeeModal({
         saved = await db.updateProfile(initialData.id, {
           full_name: fullName.trim(),
           email: email.trim().toLowerCase(),
+          username: finalUsername,
+          password: finalPassword,
           phone: phone.trim() || undefined,
           role,
           avatar_url: finalAvatar,
@@ -147,6 +164,8 @@ export function AddEmployeeModal({
         saved = await db.createProfile({
           full_name: fullName.trim(),
           email: email.trim().toLowerCase(),
+          username: finalUsername,
+          password: finalPassword,
           phone: phone.trim() || undefined,
           role,
           avatar_url: finalAvatar,
@@ -203,13 +222,13 @@ export function AddEmployeeModal({
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3 text-amber-300" />
-                  <span>{isAr ? "سوبر أدمن" : "Super Admin"}</span>
+                  <span>{isAr ? "تحكم الإدارة" : "Admin Control"}</span>
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 {isAr
-                  ? "تسجيل بيانات الموظف وتحديد الصلاحيات ونطاق الوصول"
-                  : "Provision employee credentials, roles, and platform permissions"}
+                  ? "تسجيل بيانات الموظف واليوزر نيم والباسورد ونطاق الصلاحيات"
+                  : "Provision employee credentials, login details, and access roles"}
               </p>
             </div>
           </div>
@@ -243,19 +262,33 @@ export function AddEmployeeModal({
               </h3>
               <p className="text-xs text-slate-300 mt-1">
                 {isAr
-                  ? `أصبح حساب "${createdProfile.full_name}" جاهزاً. يمكنك الآن مشاركة رابط الدخول المباشر معه.`
-                  : `Profile for "${createdProfile.full_name}" is active. Share the direct access link below.`}
+                  ? `أصبح حساب "${createdProfile.full_name}" جاهزاً. يمكنك الآن مشاركة بيانات الدخول والرابط معه.`
+                  : `Profile for "${createdProfile.full_name}" is active. Share credentials and direct link.`}
               </p>
             </div>
 
-            {/* Direct Login Link Box */}
-            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-start space-y-2">
-              <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{isAr ? "رابط الدخول المباشر للموظف:" : "Direct Staff Login Link:"}</span>
-              </label>
-              <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 font-mono text-xs text-cyan-300 break-all select-all">
-                {`${typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"}/login?rep=${createdProfile.id}`}
+            {/* Credentials Card */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-start space-y-2 text-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                <span className="text-slate-400">{isAr ? "اسم المستخدم (Username):" : "Username:"}</span>
+                <span className="font-mono font-bold text-cyan-300">
+                  {createdProfile.username || createdProfile.email.split("@")[0]}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                <span className="text-slate-400">{isAr ? "كلمة المرور (Password):" : "Password:"}</span>
+                <span className="font-mono font-bold text-amber-300">
+                  {createdProfile.password || "123456"}
+                </span>
+              </div>
+              <div className="pt-1">
+                <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5 mb-1">
+                  <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{isAr ? "رابط الدخول المباشر:" : "Direct Login Link:"}</span>
+                </label>
+                <div className="p-2 rounded-xl bg-black/40 border border-white/10 font-mono text-[11px] text-cyan-300 break-all select-all">
+                  {`${typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"}/login?rep=${createdProfile.id}`}
+                </div>
               </div>
             </div>
 
@@ -290,10 +323,10 @@ export function AddEmployeeModal({
                 <a
                   href={`https://wa.me/${createdProfile.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
                     isAr
-                      ? `مرحباً يا ${createdProfile.full_name} 👋\n\nإليك رابط دخولك المباشر لمنصة مبيعات ومعارض Falcon CNC:\n${
+                      ? `مرحباً يا ${createdProfile.full_name} 👋\n\nإليك بيانات دخولك لمنصة مبيعات ومعارض Falcon CNC:\nاسم المستخدم: ${createdProfile.username || createdProfile.email.split("@")[0]}\nكلمة المرور: ${createdProfile.password || "123456"}\n\nرابط الدخول المباشر:\n${
                           typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"
-                        }/login?rep=${createdProfile.id}\n\nيمكنك من خلال هذا الرابط تسجيل العملاء بالمعرض ومتابعة صفقاتك بشكل منفصل.`
-                      : `Hello ${createdProfile.full_name},\n\nHere is your direct access link for Falcon CNC Exhibition CRM:\n${
+                        }/login?rep=${createdProfile.id}\n\nيمكنك من خلال هذا الحساب تسجيل ومتابعة عملائك بالمعرض بشكل منفصل.`
+                      : `Hello ${createdProfile.full_name},\n\nHere are your login credentials for Falcon CNC CRM:\nUsername: ${createdProfile.username || createdProfile.email.split("@")[0]}\nPassword: ${createdProfile.password || "123456"}\n\nLogin URL:\n${
                           typeof window !== "undefined" ? window.location.origin : "https://falcon-crm-livid.vercel.app"
                         }/login?rep=${createdProfile.id}`
                   )}`}
@@ -302,7 +335,7 @@ export function AddEmployeeModal({
                   className="w-full py-2.5 px-4 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition-all"
                 >
                   <MessageCircle className="w-4 h-4 text-emerald-400" />
-                  <span>{isAr ? "إرسال عبر واتساب" : "Send WhatsApp"}</span>
+                  <span>{isAr ? "إرسال البيانات عبر واتساب" : "Send Credentials"}</span>
                 </a>
               )}
 
@@ -327,276 +360,330 @@ export function AddEmployeeModal({
 
             {/* Form Body */}
             <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-xs">
-          {/* 1. Full Name & Email */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{t("employee_name")}</span>
-                <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder={isAr ? "مثال: م. كريم الشناوي" : "e.g. Karim El-Shinawy"}
-                className="w-full glass-input rounded-xl px-3 py-2.5 text-white placeholder-slate-500 text-xs focus:ring-1 focus:ring-cyan-400/50 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{t("employee_email")}</span>
-                <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@falconcnc.com"
-                className="w-full glass-input rounded-xl px-3 py-2.5 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* 2. Phone & Language */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{t("employee_phone")}</span>
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+20 100 123 4567"
-                className="w-full glass-input rounded-xl px-3 py-2.5 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{t("employee_language")}</span>
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPreferredLanguage("ar")}
-                  className={`py-2 px-3 rounded-xl border text-center transition-all ${
-                    preferredLanguage === "ar"
-                      ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-300 font-bold shadow-sm"
-                      : "bg-white/[0.03] border-white/10 text-slate-400 hover:text-white"
-                  }`}
-                >
-                  العربية (RTL)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreferredLanguage("en")}
-                  className={`py-2 px-3 rounded-xl border text-center transition-all ${
-                    preferredLanguage === "en"
-                      ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-300 font-bold shadow-sm"
-                      : "bg-white/[0.03] border-white/10 text-slate-400 hover:text-white"
-                  }`}
-                >
-                  English (LTR)
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. Role Selection */}
-          <div>
-            <label className="block text-slate-300 font-semibold mb-1.5 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span>{t("employee_role")}</span>
-              <span className="text-rose-400">*</span>
-            </label>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {/* Sales Rep */}
-              <div
-                onClick={() => setRole("sales_rep")}
-                className={`p-3 rounded-2xl border cursor-pointer transition-all ${
-                  role === "sales_rep"
-                    ? "bg-gradient-to-b from-cyan-500/20 to-cyan-500/5 border-cyan-400/60 shadow-lg shadow-cyan-500/15"
-                    : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-400"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`font-bold text-xs ${role === "sales_rep" ? "text-cyan-300" : "text-white"}`}>
-                    {isAr ? "مندوب مبيعات" : "Sales Rep"}
-                  </span>
-                  {role === "sales_rep" && <Check className="w-3.5 h-3.5 text-cyan-400" />}
+              {/* 1. Full Name & Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{t("employee_name")}</span>
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder={isAr ? "مثال: م. كريم الشناوي" : "e.g. Karim El-Shinawy"}
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-white placeholder-slate-500 text-xs focus:ring-1 focus:ring-cyan-400/50 outline-none"
+                  />
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight">
-                  {t("employee_sales_rep_desc")}
-                </p>
-              </div>
 
-              {/* Sales Manager */}
-              <div
-                onClick={() => setRole("manager")}
-                className={`p-3 rounded-2xl border cursor-pointer transition-all ${
-                  role === "manager"
-                    ? "bg-gradient-to-b from-falcon-500/20 to-falcon-500/5 border-falcon-400/60 shadow-lg shadow-falcon-500/15"
-                    : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-400"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`font-bold text-xs ${role === "manager" ? "text-falcon-300" : "text-white"}`}>
-                    {isAr ? "مدير مبيعات" : "Sales Manager"}
-                  </span>
-                  {role === "manager" && <Check className="w-3.5 h-3.5 text-falcon-400" />}
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{t("employee_email")}</span>
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@falconcnc.com"
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
+                  />
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight">
-                  {t("employee_manager_desc")}
-                </p>
               </div>
 
-              {/* Super Admin */}
-              <div
-                onClick={() => setRole("admin")}
-                className={`p-3 rounded-2xl border cursor-pointer transition-all ${
-                  role === "admin"
-                    ? "bg-gradient-to-b from-amber-500/25 to-amber-500/5 border-amber-400/60 shadow-lg shadow-amber-500/15"
-                    : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-400"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`font-bold text-xs ${role === "admin" ? "text-amber-300" : "text-white"}`}>
-                    {isAr ? "سوبر أدمن" : "Super Admin"}
-                  </span>
-                  {role === "admin" && <Check className="w-3.5 h-3.5 text-amber-400" />}
+              {/* 2. Login Credentials: Username & Password */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-3.5 rounded-2xl bg-cyan-950/20 border border-cyan-400/20">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
+                    <AtSign className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{isAr ? "اسم المستخدم (Username)" : "Username"}</span>
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ""))}
+                    placeholder={isAr ? "اسم المستخدم (مثل: karim)" : "Username (e.g. karim)"}
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
+                  />
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight">
-                  {t("employee_admin_desc")}
-                </p>
-              </div>
-            </div>
-          </div>
 
-          {/* 4. Avatar Selection */}
-          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <label className="text-slate-300 font-semibold flex items-center gap-1.5">
-                <Camera className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{t("employee_avatar")}</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsCustomAvatar(!isCustomAvatar)}
-                className="text-[11px] text-cyan-400 hover:text-cyan-300 underline"
-              >
-                {isCustomAvatar ? t("employee_avatar_preset") : t("employee_avatar_url")}
-              </button>
-            </div>
-
-            {isCustomAvatar ? (
-              <input
-                type="url"
-                value={customAvatarInput}
-                onChange={(e) => setCustomAvatarInput(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full glass-input rounded-xl px-3 py-2 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
-              />
-            ) : (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none">
-                {AVATAR_PRESETS.map((preset, idx) => {
-                  const isSelected = avatarUrl === preset.url;
-                  return (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-slate-300 font-semibold flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{isAr ? "كلمة المرور (Password)" : "Password"}</span>
+                      <span className="text-rose-400">*</span>
+                    </label>
                     <button
-                      key={idx}
                       type="button"
-                      onClick={() => setAvatarUrl(preset.url)}
-                      className={`relative flex-shrink-0 w-11 h-11 rounded-full p-0.5 border-2 transition-all ${
-                        isSelected
-                          ? "border-cyan-400 scale-110 shadow-lg shadow-cyan-500/30"
-                          : "border-white/15 opacity-70 hover:opacity-100"
+                      onClick={() => setPassword(Math.random().toString(36).slice(-8))}
+                      className="text-[10px] text-cyan-400 hover:underline font-mono"
+                    >
+                      {isAr ? "توليد كلمة سر" : "Generate"}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full glass-input rounded-xl px-3 py-2.5 pr-8 rtl:pr-3 rtl:pl-8 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 rtl:right-auto rtl:left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
+                      title={showPassword ? "Hide" : "Show"}
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Phone & Language */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{t("employee_phone")}</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+20 100 123 4567"
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{t("employee_language")}</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreferredLanguage("ar")}
+                      className={`py-2 px-3 rounded-xl border text-center transition-all ${
+                        preferredLanguage === "ar"
+                          ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-300 font-bold shadow-sm"
+                          : "bg-white/[0.03] border-white/10 text-slate-400 hover:text-white"
                       }`}
                     >
-                      <img
-                        src={preset.url}
-                        alt={preset.label}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                      {isSelected && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-400 text-black flex items-center justify-center">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
-                        </div>
-                      )}
+                      العربية (RTL)
                     </button>
-                  );
-                })}
+                    <button
+                      type="button"
+                      onClick={() => setPreferredLanguage("en")}
+                      className={`py-2 px-3 rounded-xl border text-center transition-all ${
+                        preferredLanguage === "en"
+                          ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-300 font-bold shadow-sm"
+                          : "bg-white/[0.03] border-white/10 text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      English (LTR)
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* 5. Account Status Toggle */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/10">
-            <div>
-              <span className="font-semibold text-white block">
-                {t("employee_status")}
-              </span>
-              <span className="text-[10px] text-slate-400">
-                {isActive ? t("employee_active") : t("employee_inactive")}
-              </span>
-            </div>
+              {/* 4. Role Selection */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1.5 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{t("employee_role")}</span>
+                  <span className="text-rose-400">*</span>
+                </label>
 
-            <button
-              type="button"
-              onClick={() => setIsActive(!isActive)}
-              className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
-                isActive ? "bg-emerald-500" : "bg-slate-700"
-              }`}
-            >
-              <div
-                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                  isActive ? (isAr ? "-translate-x-6" : "translate-x-6") : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {/* Sales Rep */}
+                  <div
+                    onClick={() => setRole("sales_rep")}
+                    className={`p-3 rounded-2xl border cursor-pointer transition-all ${
+                      role === "sales_rep"
+                        ? "bg-gradient-to-b from-cyan-500/20 to-cyan-500/5 border-cyan-400/60 shadow-lg shadow-cyan-500/15"
+                        : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-400"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`font-bold text-xs ${role === "sales_rep" ? "text-cyan-300" : "text-white"}`}>
+                        {isAr ? "مندوب مبيعات" : "Sales Rep"}
+                      </span>
+                      {role === "sales_rep" && <Check className="w-3.5 h-3.5 text-cyan-400" />}
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-tight">
+                      {t("employee_sales_rep_desc")}
+                    </p>
+                  </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl border border-white/15 text-slate-300 hover:text-white hover:bg-white/5 font-semibold text-xs transition-colors"
-            >
-              {t("cancel")}
-            </button>
+                  {/* Sales Manager */}
+                  <div
+                    onClick={() => setRole("manager")}
+                    className={`p-3 rounded-2xl border cursor-pointer transition-all ${
+                      role === "manager"
+                        ? "bg-gradient-to-b from-falcon-500/20 to-falcon-500/5 border-falcon-400/60 shadow-lg shadow-falcon-500/15"
+                        : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-400"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`font-bold text-xs ${role === "manager" ? "text-falcon-300" : "text-white"}`}>
+                        {isAr ? "مدير مبيعات" : "Sales Manager"}
+                      </span>
+                      {role === "manager" && <Check className="w-3.5 h-3.5 text-falcon-400" />}
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-tight">
+                      {t("employee_manager_desc")}
+                    </p>
+                  </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-falcon-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-white font-bold text-xs shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition-all disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : isEditMode ? (
-                <>
-                  <UserCheck className="w-4 h-4" />
-                  <span>{t("update_employee")}</span>
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-4 h-4" />
-                  <span>{t("save_employee")}</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </>
-    )}
+                  {/* Super Admin */}
+                  <div
+                    onClick={() => setRole("admin")}
+                    className={`p-3 rounded-2xl border cursor-pointer transition-all ${
+                      role === "admin"
+                        ? "bg-gradient-to-b from-amber-500/25 to-amber-500/5 border-amber-400/60 shadow-lg shadow-amber-500/15"
+                        : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-400"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`font-bold text-xs ${role === "admin" ? "text-amber-300" : "text-white"}`}>
+                        {isAr ? "سوبر أدمن" : "Super Admin"}
+                      </span>
+                      {role === "admin" && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-tight">
+                      {t("employee_admin_desc")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Avatar Selection */}
+              <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-300 font-semibold flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{t("employee_avatar")}</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomAvatar(!isCustomAvatar)}
+                    className="text-[11px] text-cyan-400 hover:text-cyan-300 underline"
+                  >
+                    {isCustomAvatar ? t("employee_avatar_preset") : t("employee_avatar_url")}
+                  </button>
+                </div>
+
+                {isCustomAvatar ? (
+                  <input
+                    type="url"
+                    value={customAvatarInput}
+                    onChange={(e) => setCustomAvatarInput(e.target.value)}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full glass-input rounded-xl px-3 py-2 text-white placeholder-slate-500 text-xs font-mono focus:ring-1 focus:ring-cyan-400/50 outline-none"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none">
+                    {AVATAR_PRESETS.map((preset, idx) => {
+                      const isSelected = avatarUrl === preset.url;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setAvatarUrl(preset.url)}
+                          className={`relative flex-shrink-0 w-11 h-11 rounded-full p-0.5 border-2 transition-all ${
+                            isSelected
+                              ? "border-cyan-400 scale-110 shadow-lg shadow-cyan-500/30"
+                              : "border-white/15 opacity-70 hover:opacity-100"
+                          }`}
+                        >
+                          <img
+                            src={preset.url}
+                            alt={preset.label}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                          {isSelected && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-400 text-black flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* 6. Account Status Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/10">
+                <div>
+                  <span className="font-semibold text-white block">
+                    {t("employee_status")}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {isActive ? t("employee_active") : t("employee_inactive")}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsActive(!isActive)}
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
+                    isActive ? "bg-emerald-500" : "bg-slate-700"
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                      isActive ? (isAr ? "-translate-x-6" : "translate-x-6") : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                  className="px-4 py-2.5 rounded-xl border border-white/15 text-slate-300 hover:text-white hover:bg-white/5 font-semibold text-xs transition-colors"
+                >
+                  {t("cancel")}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-falcon-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-white font-bold text-xs shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : isEditMode ? (
+                    <>
+                      <UserCheck className="w-4 h-4" />
+                      <span>{t("update_employee")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      <span>{t("save_employee")}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
   Users,
@@ -31,17 +32,21 @@ interface BottomNavProps {
 export function BottomNav({ onOpenQuickAdd, overdueCount = 0 }: BottomNavProps) {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const { currentRole } = useAuth();
+  const isManagerOrAdmin = currentRole === "admin" || currentRole === "manager";
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
-  const moreItems = [
+  const allMoreItems = [
     { href: "/pipeline", label: t("nav_pipeline"), icon: GitPullRequest, badge: "Kanban" },
     { href: "/exhibitions", label: t("nav_exhibitions"), icon: Building2 },
     { href: "/magnets", label: t("nav_magnets"), icon: Magnet, badge: "Lead Magnet" },
     { href: "/whatsapp-qr", label: t("nav_whatsapp"), icon: QrCode, badge: "Fast QR" },
-    { href: "/reports", label: t("nav_reports"), icon: BarChart3 },
-    { href: "/team", label: t("nav_team"), icon: ShieldCheck },
-    { href: "/settings", label: t("nav_settings"), icon: Settings },
+    { href: "/reports", label: t("nav_reports"), icon: BarChart3, managerOrAdmin: true },
+    { href: "/team", label: t("nav_team"), icon: ShieldCheck, managerOrAdmin: true },
+    { href: "/settings", label: t("nav_settings"), icon: Settings, managerOrAdmin: true },
   ];
+
+  const moreItems = allMoreItems.filter((i) => !i.managerOrAdmin || isManagerOrAdmin);
 
   return (
     <>

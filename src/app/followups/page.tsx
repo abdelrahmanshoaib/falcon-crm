@@ -54,8 +54,8 @@ function FollowUpsContent() {
   // Filtering views
   const filteredList = useMemo(() => {
     return followUps.filter((item) => {
-      // Rep access check
-      if (currentRole === "sales_rep" && item.assigned_to && item.assigned_to !== currentUser.id) {
+      // Rep access check: sales rep strictly sees their own assigned tasks
+      if (currentRole === "sales_rep" && item.assigned_to !== currentUser.id) {
         return false;
       }
 

@@ -36,12 +36,11 @@ export default function PipelinePage() {
   }, []);
 
   const filteredLeads = leads.filter((l) => {
-    if (
-      currentRole === "sales_rep" &&
-      l.sales_owner_id &&
-      l.sales_owner_id !== currentUser.id
-    ) {
-      return false;
+    if (currentRole === "sales_rep") {
+      const isMine =
+        (l.sales_owner_id && l.sales_owner_id === currentUser.id) ||
+        (l.sales_owner_name && l.sales_owner_name === currentUser.full_name);
+      if (!isMine) return false;
     }
     if (selectedExhibitionId !== "all" && l.exhibition_id !== selectedExhibitionId) {
       return false;
@@ -59,21 +58,29 @@ export default function PipelinePage() {
   return (
     <div className="space-y-4 flex flex-col h-[calc(100vh-6rem)]">
       {/* HEADER & FILTERS */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-panel p-4 rounded-2xl relative overflow-hidden shrink-0">
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none" />
         <div>
           <div className="flex items-center gap-2">
-            <GitPullRequest className="w-5 h-5 text-falcon-400" />
+            <GitPullRequest className="w-5 h-5 text-cyan-400" />
             <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               {t("nav_pipeline")}
             </h1>
+            {currentRole === "sales_rep" && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                صفقاتك فقط ({filteredLeads.length})
+              </span>
+            )}
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Drag deals between stages. Record required closing dates, values, or lost reasons.
+          <p className="text-xs text-slate-300/80 mt-0.5">
+            {currentRole === "sales_rep"
+              ? "إدارة صفقاتك وعروض أسعارك الخاصة في خط سير المبيعات"
+              : "Drag deals between stages. Record required closing dates, values, or lost reasons."}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 font-mono text-xs">
             <span className="text-slate-400">Total Value: </span>
             <span className="font-bold text-emerald-400">
               {formatCurrency(totalPipelineValue)}
@@ -84,26 +91,26 @@ export default function PipelinePage() {
           <select
             value={selectedExhibitionId}
             onChange={(e) => setSelectedExhibitionId(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none"
+            className="glass-input rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
           >
-            <option value="all">All Exhibitions</option>
+            <option value="all" className="bg-slate-900">All Exhibitions</option>
             {exhibitions.map((ex) => (
-              <option key={ex.id} value={ex.id}>
+              <option key={ex.id} value={ex.id} className="bg-slate-900">
                 {ex.name}
               </option>
             ))}
           </select>
 
-          {/* Rep Filter */}
+          {/* Rep Filter (For Admins & Managers) */}
           {currentRole !== "sales_rep" && (
             <select
               value={selectedRepId}
               onChange={(e) => setSelectedRepId(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none"
+              className="glass-input rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
             >
-              <option value="all">All Sales Reps</option>
+              <option value="all" className="bg-slate-900">All Sales Reps</option>
               {profiles.map((p) => (
-                <option key={p.id} value={p.id}>
+                <option key={p.id} value={p.id} className="bg-slate-900">
                   {p.full_name}
                 </option>
               ))}

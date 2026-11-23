@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { Sidebar } from "./Sidebar";
 import { Navbar } from "./Navbar";
 import { BottomNav } from "./BottomNav";
@@ -13,6 +15,18 @@ import { db } from "@/lib/db";
 import { Lead, SalesMagnet, FollowUp } from "@/types/crm";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  const isAuthPage = pathname === "/login" || pathname?.startsWith("/rep");
+
+  useEffect(() => {
+    if (!isAuthenticated && !isAuthPage) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, isAuthPage, router]);
+
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Global Modals
@@ -39,8 +53,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    refreshOverdue();
-  }, []);
+    if (isAuthenticated) {
+      refreshOverdue();
+    }
+  }, [isAuthenticated]);
 
   const handleActionSelect = (
     action: "profile" | "followup" | "qr",
@@ -59,6 +75,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       setQrModalOpen(true);
     }
   };
+
+  // If on login/auth page OR not authenticated: render ONLY the login page!
+  if (isAuthPage || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#060913] text-slate-100 flex flex-col font-sans selection:bg-falcon-500 selection:text-white relative">
+        <div className="ambient-glow-mesh" aria-hidden="true" />
+        <div className="ambient-glow-bottom" aria-hidden="true" />
+        <main className="flex-1 relative z-10 flex items-center justify-center p-3 sm:p-5">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#060913] text-slate-100 flex flex-col font-sans selection:bg-falcon-500 selection:text-white relative">

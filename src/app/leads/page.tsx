@@ -126,6 +126,7 @@ function LeadsContent() {
     sortBy,
     currentRole,
     currentUser.id,
+    currentUser.full_name,
   ]);
 
   const handleExportCSV = () => {
@@ -330,13 +331,30 @@ function LeadsContent() {
             ))}
           </select>
 
+          {/* Sales Rep Filter (For Admins and Managers) */}
+          {currentRole !== "sales_rep" && (
+            <select
+              value={repFilter}
+              onChange={(e) => setRepFilter(e.target.value)}
+              className="glass-input rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none"
+            >
+              <option value="all" className="bg-slate-900">All Sales Reps</option>
+              {profiles.map((p) => (
+                <option key={p.id} value={p.id} className="bg-slate-900">
+                  {p.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+
           {/* Clear Filters */}
-          {(stageFilter !== "all" || tempFilter !== "all" || exhibitionFilter !== "all" || search) && (
+          {(stageFilter !== "all" || tempFilter !== "all" || exhibitionFilter !== "all" || repFilter !== "all" || search) && (
             <button
               onClick={() => {
                 setStageFilter("all");
                 setTempFilter("all");
                 setExhibitionFilter("all");
+                setRepFilter("all");
                 setSearch("");
               }}
               className="text-[11px] text-rose-400 hover:text-rose-300 hover:underline px-2 py-0.5 font-semibold"

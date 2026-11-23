@@ -8,10 +8,11 @@ import { UserRole } from "@/types/crm";
 import { Shield, Database, RefreshCw, Globe, Wifi, WifiOff, Sparkles } from "lucide-react";
 
 export function RolePreviewBar() {
-  const { currentUser, currentRole, switchRole } = useAuth();
+  const { currentUser, currentRole, switchRole, logout } = useAuth();
   const { language, toggleLanguage } = useLanguage();
   const [isOnline, setIsOnline] = useState(true);
   const isRealSupabase = db.isRealSupabase();
+  const isManagerOrAdmin = currentRole === "admin" || currentRole === "manager";
 
   useEffect(() => {
     setIsOnline(navigator.onLine);
@@ -67,25 +68,40 @@ export function RolePreviewBar() {
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* Role Switcher */}
-        <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10">
-          <span className="text-[10px] text-slate-400 px-1.5 hidden lg:inline font-mono">
-            Role:
-          </span>
-          {roles.map((r) => (
-            <button
-              key={r.role}
-              onClick={() => switchRole(r.role)}
-              className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-all ${
-                currentRole === r.role
-                  ? "bg-gradient-to-r from-falcon-600 to-cyan-500 text-white shadow-[0_0_12px_rgba(14,165,233,0.4)] border border-white/20"
-                  : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
-              }`}
-            >
-              {language === "ar" ? r.labelAr : r.labelEn}
-            </button>
-          ))}
-        </div>
+        {/* Role Switcher for Managers/Admins, or Locked Badge for Sales Rep */}
+        {isManagerOrAdmin ? (
+          <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10">
+            <span className="text-[10px] text-slate-400 px-1.5 hidden lg:inline font-mono">
+              Role:
+            </span>
+            {roles.map((r) => (
+              <button
+                key={r.role}
+                onClick={() => switchRole(r.role)}
+                className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-semibold transition-all ${
+                  currentRole === r.role
+                    ? "bg-gradient-to-r from-falcon-600 to-cyan-500 text-white shadow-[0_0_12px_rgba(14,165,233,0.4)] border border-white/20"
+                    : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
+                }`}
+              >
+                {language === "ar" ? r.labelAr : r.labelEn}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-xl bg-cyan-500/15 border border-cyan-400/40 text-[10px] sm:text-[11px] font-bold text-cyan-300">
+            <span>{language === "ar" ? "مندوب مبيعات" : "Sales Representative"}</span>
+          </div>
+        )}
+
+        {/* Logout Button */}
+        <button
+          onClick={logout}
+          className="flex items-center gap-1 px-2 py-1 rounded-xl glass-pill text-slate-300 hover:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition-all"
+          title={language === "ar" ? "تسجيل الخروج" : "Sign Out"}
+        >
+          <span>{language === "ar" ? "خروج" : "Logout"}</span>
+        </button>
 
         {/* Language Switcher */}
         <button

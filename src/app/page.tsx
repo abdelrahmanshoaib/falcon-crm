@@ -58,8 +58,11 @@ export default function DashboardPage() {
 
   // Filter leads according to role & user selections
   const filteredLeads = leads.filter((lead) => {
-    if (currentRole === "sales_rep" && lead.sales_owner_id && lead.sales_owner_id !== currentUser.id) {
-      return false;
+    if (currentRole === "sales_rep") {
+      const isMine =
+        (lead.sales_owner_id && lead.sales_owner_id === currentUser.id) ||
+        (lead.sales_owner_name && lead.sales_owner_name === currentUser.full_name);
+      if (!isMine) return false;
     }
     if (selectedExhibitionId !== "all" && lead.exhibition_id !== selectedExhibitionId) {
       return false;

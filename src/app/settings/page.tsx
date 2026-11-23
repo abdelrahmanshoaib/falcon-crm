@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/db";
@@ -23,10 +24,17 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { t, language, setLanguage } = useLanguage();
   const isAr = language === "ar";
   const { currentUser, currentRole, can, refreshProfiles } = useAuth();
-  const isSuperAdmin = can("manage_admins") || currentRole === "admin";
+  const canManageStaff = can("manage_admins") || currentRole === "admin" || currentRole === "manager";
+
+  useEffect(() => {
+    if (currentRole === "sales_rep") {
+      router.push("/leads");
+    }
+  }, [currentRole, router]);
 
   const [companyName, setCompanyName] = useState("Falcon CNC Machinery");
   const [whatsappPhone, setWhatsappPhone] = useState(
@@ -84,8 +92,8 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* 2. SUPER ADMIN EMPLOYEE MANAGEMENT CARD */}
-      {isSuperAdmin && (
+      {/* 2. EMPLOYEE MANAGEMENT CARD (Admin & Manager) */}
+      {canManageStaff && (
         <div className="p-5 sm:p-6 rounded-3xl glass-card border border-amber-500/30 relative overflow-hidden space-y-4 shadow-xl">
           {/* Top highlight bar */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-cyan-400 to-amber-500" />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/db";
@@ -19,8 +20,15 @@ import {
 } from "lucide-react";
 
 export default function ReportsPage() {
+  const router = useRouter();
   const { t } = useLanguage();
   const { can, currentRole } = useAuth();
+
+  useEffect(() => {
+    if (currentRole === "sales_rep") {
+      router.push("/leads");
+    }
+  }, [currentRole, router]);
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);

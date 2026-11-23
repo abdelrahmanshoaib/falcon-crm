@@ -67,6 +67,8 @@ export interface UserProfile {
   phone?: string;
   is_active: boolean;
   preferred_language: "en" | "ar";
+  username?: string;
+  password?: string;
 }
 
 export interface Exhibition {

@@ -30,7 +30,8 @@ interface SidebarProps {
 export function Sidebar({ onOpenQuickAdd, overdueCount = 0 }: SidebarProps) {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { currentUser, can } = useAuth();
+  const { currentUser, currentRole } = useAuth();
+  const isManagerOrAdmin = currentRole === "admin" || currentRole === "manager";
 
   const navItems = [
     { href: "/", label: t("nav_dashboard"), icon: LayoutDashboard },
@@ -45,9 +46,9 @@ export function Sidebar({ onOpenQuickAdd, overdueCount = 0 }: SidebarProps) {
     { href: "/exhibitions", label: t("nav_exhibitions"), icon: Building2 },
     { href: "/magnets", label: t("nav_magnets"), icon: Magnet },
     { href: "/whatsapp-qr", label: t("nav_whatsapp"), icon: QrCode },
-    { href: "/reports", label: t("nav_reports"), icon: BarChart3 },
-    { href: "/team", label: t("nav_team"), icon: ShieldCheck, permission: "view_all_leads" },
-    { href: "/settings", label: t("nav_settings"), icon: Settings },
+    { href: "/reports", label: t("nav_reports"), icon: BarChart3, managerOrAdmin: true },
+    { href: "/team", label: t("nav_team"), icon: ShieldCheck, managerOrAdmin: true },
+    { href: "/settings", label: t("nav_settings"), icon: Settings, managerOrAdmin: true },
   ];
 
   return (
@@ -91,7 +92,7 @@ export function Sidebar({ onOpenQuickAdd, overdueCount = 0 }: SidebarProps) {
       {/* Navigation Items */}
       <nav className="flex-1 px-3 space-y-1 overflow-y-auto pt-1">
         {navItems.map((item) => {
-          if (item.permission && !can(item.permission)) return null;
+          if (item.managerOrAdmin && !isManagerOrAdmin) return null;
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
