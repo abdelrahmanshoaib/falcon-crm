@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { UserProfile, UserRole } from "@/types/crm";
 import { initialProfiles } from "@/lib/seed-data";
+import { db } from "@/lib/db";
 
 interface AuthContextType {
   currentUser: UserProfile;
@@ -10,25 +11,41 @@ interface AuthContextType {
   switchRole: (role: UserRole) => void;
   can: (action: string) => boolean;
   allProfiles: UserProfile[];
+  refreshProfiles: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [profiles, setProfiles] = useState<UserProfile[]>(initialProfiles);
   const [currentUser, setCurrentUser] = useState<UserProfile>(initialProfiles[0]); // Default Admin or saved
 
-  useEffect(() => {
-    const savedRoleId = localStorage.getItem("falcon_crm_active_user_id");
-    if (savedRoleId) {
-      const found = initialProfiles.find((p) => p.id === savedRoleId);
-      if (found) setCurrentUser(found);
+  const refreshProfiles = useCallback(async () => {
+    try {
+      const list = await db.getProfiles();
+      if (list && list.length > 0) {
+        setProfiles(list);
+        const savedRoleId = typeof window !== "undefined" ? localStorage.getItem("falcon_crm_active_user_id") : null;
+        if (savedRoleId) {
+          const found = list.find((p) => p.id === savedRoleId);
+          if (found) setCurrentUser(found);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load profiles:", e);
     }
   }, []);
 
+  useEffect(() => {
+    refreshProfiles();
+  }, [refreshProfiles]);
+
   const switchRole = (role: UserRole) => {
-    const target = initialProfiles.find((p) => p.role === role) || initialProfiles[0];
+    const target = profiles.find((p) => p.role === role) || initialProfiles.find((p) => p.role === role) || profiles[0] || initialProfiles[0];
     setCurrentUser(target);
-    localStorage.setItem("falcon_crm_active_user_id", target.id);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("falcon_crm_active_user_id", target.id);
+    }
   };
 
   const can = (action: string): boolean => {
@@ -67,7 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         currentRole: currentUser.role,
         switchRole,
         can,
-        allProfiles: initialProfiles,
+        allProfiles: profiles,
+        refreshProfiles,
       }}
     >
       {children}

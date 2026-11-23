@@ -82,6 +82,7 @@ export const db = {
     localStorage.removeItem(STORAGE_KEYS.NOTES);
     localStorage.removeItem(STORAGE_KEYS.ACTIVITIES);
     localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
+    localStorage.removeItem(STORAGE_KEYS.PROFILES);
     localStorage.removeItem(STORAGE_KEYS.OFFLINE_QUEUE);
     window.location.reload();
   },
@@ -578,6 +579,54 @@ export const db = {
       if (!error && data) return data as UserProfile[];
     }
     return getFromStorage<UserProfile[]>(STORAGE_KEYS.PROFILES, initialProfiles);
+  },
+
+  async createProfile(profileData: Omit<UserProfile, "id">): Promise<UserProfile> {
+    const newProfile: UserProfile = {
+      ...profileData,
+      id:
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `rep-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+    };
+
+    if (isSupabaseConfigured() && supabase) {
+      const { data, error } = await supabase.from("profiles").insert([newProfile]).select().single();
+      if (!error && data) return data as UserProfile;
+    }
+
+    const currentProfiles = getFromStorage<UserProfile[]>(STORAGE_KEYS.PROFILES, initialProfiles);
+    const updated = [...currentProfiles, newProfile];
+    saveToStorage(STORAGE_KEYS.PROFILES, updated);
+    return newProfile;
+  },
+
+  async updateProfile(id: string, updates: Partial<UserProfile>): Promise<UserProfile | null> {
+    if (isSupabaseConfigured() && supabase) {
+      const { data, error } = await supabase.from("profiles").update(updates).eq("id", id).select().single();
+      if (!error && data) return data as UserProfile;
+    }
+
+    const currentProfiles = getFromStorage<UserProfile[]>(STORAGE_KEYS.PROFILES, initialProfiles);
+    const index = currentProfiles.findIndex((p) => p.id === id);
+    if (index === -1) return null;
+
+    const updatedProfile = { ...currentProfiles[index], ...updates };
+    currentProfiles[index] = updatedProfile;
+    saveToStorage(STORAGE_KEYS.PROFILES, currentProfiles);
+    return updatedProfile;
+  },
+
+  async deleteProfile(id: string): Promise<boolean> {
+    if (isSupabaseConfigured() && supabase) {
+      const { error } = await supabase.from("profiles").delete().eq("id", id);
+      if (error) return false;
+    }
+
+    const currentProfiles = getFromStorage<UserProfile[]>(STORAGE_KEYS.PROFILES, initialProfiles);
+    const filtered = currentProfiles.filter((p) => p.id !== id);
+    saveToStorage(STORAGE_KEYS.PROFILES, filtered);
+    return true;
   },
 
   // 9. NOTIFICATIONS
