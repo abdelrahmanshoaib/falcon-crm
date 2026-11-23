@@ -1,0 +1,17 @@
+{
+  "name": "Falcon Exhibition CRM",
+  "short_name": "Falcon CRM",
+  "description": "High-Performance Exhibition Sales Magnet & Lead Capture Platform for Falcon CNC Machinery",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1d",
+  "theme_color": "#0284c7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
