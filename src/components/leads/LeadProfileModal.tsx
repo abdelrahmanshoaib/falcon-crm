@@ -108,13 +108,15 @@ export function LeadProfileModal({
   const cleanPhone = lead.phone.replace(/[^0-9]/g, "");
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl text-white shadow-2xl overflow-hidden my-auto flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="glass-modal rounded-[28px] w-full max-w-3xl text-white shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden my-auto flex flex-col max-h-[92vh] border border-white/20 relative animate-in fade-in zoom-in-95 duration-200">
         {/* HEADER */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-b border-white/10 bg-white/[0.02] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-falcon-400 font-bold text-lg shrink-0">
-              {lead.full_name.charAt(0)}
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-falcon-600 via-cyan-500 to-indigo-600 p-[1px] shadow-lg shadow-falcon-600/25 shrink-0">
+              <div className="w-full h-full rounded-2xl bg-slate-950 flex items-center justify-center text-cyan-300 font-extrabold text-lg font-mono">
+                {lead.full_name.charAt(0)}
+              </div>
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -156,7 +158,7 @@ export function LeadProfileModal({
               <>
                 <a
                   href={`tel:${lead.phone}`}
-                  className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 transition-colors"
+                  className="p-2.5 rounded-xl glass-pill text-blue-400 hover:text-white transition-all active:scale-95"
                   title={t("call")}
                 >
                   <Phone className="w-4 h-4" />
@@ -166,7 +168,7 @@ export function LeadProfileModal({
                   href={`https://wa.me/${cleanPhone}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 transition-colors"
+                  className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 transition-all active:scale-95 shadow-sm"
                   title={t("whatsapp")}
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -178,7 +180,7 @@ export function LeadProfileModal({
               onClick={() => {
                 if (onOpenFollowUp) onOpenFollowUp(lead);
               }}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition-colors"
+              className="p-2.5 rounded-xl glass-pill text-amber-400 hover:text-white transition-all active:scale-95"
               title={t("schedule_followup")}
             >
               <CalendarPlus className="w-4 h-4" />
@@ -188,7 +190,7 @@ export function LeadProfileModal({
               onClick={() => {
                 if (onOpenQR) onOpenQR(lead);
               }}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-falcon-400 border border-slate-700 transition-colors"
+              className="p-2.5 rounded-xl glass-pill text-cyan-400 hover:text-white transition-all active:scale-95"
               title={t("generate_qr")}
             >
               <QrCode className="w-4 h-4" />
@@ -196,15 +198,15 @@ export function LeadProfileModal({
 
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="p-2.5 rounded-xl glass-pill text-slate-400 hover:text-white transition-all active:scale-95"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* TABS BAR */}
-        <div className="flex border-b border-slate-800 bg-slate-950 px-4 gap-4 overflow-x-auto text-xs">
+        <div className="flex border-b border-white/10 bg-white/[0.01] px-4 gap-4 overflow-x-auto text-xs">
           {[
             { id: "overview", label: t("tab_overview") },
             { id: "qualification", label: t("tab_qualification") },
@@ -214,9 +216,9 @@ export function LeadProfileModal({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`py-3 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+              className={`py-3 font-bold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "border-falcon-500 text-falcon-400"
+                  ? "border-cyan-400 text-cyan-300"
                   : "border-transparent text-slate-400 hover:text-slate-200"
               }`}
             >

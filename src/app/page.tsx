@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Flame,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -49,7 +50,6 @@ export default function DashboardPage() {
       setExhibitions(exhibitionsData);
       setProfiles(profilesData);
 
-      // Collect activities across top leads
       if (leadsData.length > 0) {
         db.getLeadActivities(leadsData[0].id).then(setActivities);
       }
@@ -58,7 +58,6 @@ export default function DashboardPage() {
 
   // Filter leads according to role & user selections
   const filteredLeads = leads.filter((lead) => {
-    // If sales rep, only show assigned leads if restricted
     if (currentRole === "sales_rep" && lead.sales_owner_id && lead.sales_owner_id !== currentUser.id) {
       return false;
     }
@@ -117,14 +116,19 @@ export default function DashboardPage() {
     .reduce((sum, l) => sum + (l.estimated_deal_value || 0), 0);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* 1. TOP HEADER & FILTER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-4 sm:p-5 rounded-2xl glass-panel relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none" />
+
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            {t("nav_dashboard")}
-          </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+              {t("nav_dashboard")}
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+            </h1>
+          </div>
+          <p className="text-xs text-slate-300/80 mt-0.5">
             {currentRole === "sales_rep"
               ? `Personal Performance Cockpit — ${currentUser.full_name}`
               : "Company-Wide Machinery Sales Operations Cockpit"}
@@ -137,11 +141,11 @@ export default function DashboardPage() {
           <select
             value={selectedExhibitionId}
             onChange={(e) => setSelectedExhibitionId(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-falcon-500"
+            className="glass-input rounded-xl px-3 py-1.5 text-slate-200 text-xs focus:outline-none"
           >
-            <option value="all">{t("all")} Exhibitions</option>
+            <option value="all" className="bg-slate-900">{t("all")} Exhibitions</option>
             {exhibitions.map((ex) => (
-              <option key={ex.id} value={ex.id}>
+              <option key={ex.id} value={ex.id} className="bg-slate-900">
                 {ex.name}
               </option>
             ))}
@@ -152,11 +156,11 @@ export default function DashboardPage() {
             <select
               value={selectedRepId}
               onChange={(e) => setSelectedRepId(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-falcon-500"
+              className="glass-input rounded-xl px-3 py-1.5 text-slate-200 text-xs focus:outline-none"
             >
-              <option value="all">{t("all")} Sales Reps</option>
+              <option value="all" className="bg-slate-900">{t("all")} Sales Reps</option>
               {profiles.map((p) => (
-                <option key={p.id} value={p.id}>
+                <option key={p.id} value={p.id} className="bg-slate-900">
                   {p.full_name}
                 </option>
               ))}
@@ -167,30 +171,32 @@ export default function DashboardPage() {
           <select
             value={selectedTemp}
             onChange={(e) => setSelectedTemp(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-falcon-500"
+            className="glass-input rounded-xl px-3 py-1.5 text-slate-200 text-xs focus:outline-none"
           >
-            <option value="all">{t("all")} Temps</option>
-            <option value="HOT">HOT 🔥</option>
-            <option value="WARM">WARM ☀️</option>
-            <option value="COLD">COLD ❄️</option>
+            <option value="all" className="bg-slate-900">{t("all")} Temps</option>
+            <option value="HOT" className="bg-slate-900">HOT 🔥</option>
+            <option value="WARM" className="bg-slate-900">WARM ☀️</option>
+            <option value="COLD" className="bg-slate-900">COLD ❄️</option>
           </select>
         </div>
       </div>
 
       {/* 2. ACTIVE EXHIBITION HERO PROGRESS CARD */}
       {activeExhibition && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-falcon-950/60 border border-slate-800 shadow-md">
+        <div className="p-4 sm:p-5 rounded-2xl glass-card relative overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent pointer-events-none" />
+
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.3)]">
                   LIVE EXHIBITION
                 </span>
                 <span className="text-xs text-slate-400">
                   {activeExhibition.location}
                 </span>
               </div>
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-lg font-bold text-white tracking-wide">
                 {activeExhibition.name}
               </h2>
               <p className="text-xs text-slate-400 max-w-xl">
@@ -198,17 +204,18 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
-              <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 shadow-inner">
                 <span className="text-[10px] text-slate-400 block font-sans">
                   Target Progress
                 </span>
                 <span className="text-sm font-bold text-white">
-                  {filteredLeads.length} / {targetLeads} ({targetProgress}%)
+                  {filteredLeads.length} / {targetLeads}{" "}
+                  <span className="text-cyan-400">({targetProgress}%)</span>
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 shadow-inner">
                 <span className="text-[10px] text-slate-400 block font-sans">
                   Pipeline Value
                 </span>
@@ -221,10 +228,10 @@ export default function DashboardPage() {
 
           {/* Target Progress Bar */}
           <div className="mt-4 space-y-1">
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-full h-2.5 rounded-full bg-black/40 border border-white/10 overflow-hidden">
               <div
                 style={{ width: `${targetProgress}%` }}
-                className="h-full bg-gradient-to-r from-falcon-600 to-emerald-500 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-falcon-500 via-cyan-400 to-emerald-400 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(14,165,233,0.5)]"
               />
             </div>
           </div>
@@ -243,17 +250,21 @@ export default function DashboardPage() {
 
       {/* 5. SALES TEAM LEADERBOARD (FOR ADMINS & MANAGERS) */}
       {currentRole !== "sales_rep" && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <div className="p-4 sm:p-5 rounded-2xl glass-card space-y-3 relative overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent pointer-events-none" />
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-400" />
+              <div className="p-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                <Trophy className="w-4 h-4" />
+              </div>
               <h3 className="font-bold text-sm text-white">
                 {t("team_performance")}
               </h3>
             </div>
             <Link
               href="/team"
-              className="text-xs text-falcon-400 hover:underline flex items-center gap-1"
+              className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 font-semibold"
             >
               <span>Manage Team</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -263,15 +274,15 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left rtl:text-right">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400">
-                  <th className="pb-2 font-medium">Sales Representative</th>
-                  <th className="pb-2 font-medium text-center">Leads Captured</th>
-                  <th className="pb-2 font-medium text-center">HOT Prospects</th>
-                  <th className="pb-2 font-medium text-center">Quotations</th>
-                  <th className="pb-2 font-medium text-center">Won Deals</th>
+                <tr className="border-b border-white/10 text-slate-400">
+                  <th className="pb-2 font-semibold">Sales Representative</th>
+                  <th className="pb-2 font-semibold text-center">Leads Captured</th>
+                  <th className="pb-2 font-semibold text-center">HOT Prospects</th>
+                  <th className="pb-2 font-semibold text-center">Quotations</th>
+                  <th className="pb-2 font-semibold text-center">Won Deals</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-white/5">
                 {profiles
                   .filter((p) => p.role === "sales_rep" || p.role === "manager")
                   .map((rep) => {
@@ -281,12 +292,12 @@ export default function DashboardPage() {
                     const repWon = repLeads.filter((l) => l.sales_stage === "won").length;
 
                     return (
-                      <tr key={rep.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-2.5 flex items-center gap-2 font-semibold text-white">
+                      <tr key={rep.id} className="hover:bg-white/[0.04] transition-colors">
+                        <td className="py-2.5 flex items-center gap-2.5 font-semibold text-white">
                           <img
                             src={rep.avatar_url || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"}
                             alt={rep.full_name}
-                            className="w-6 h-6 rounded-full object-cover"
+                            className="w-7 h-7 rounded-full object-cover border border-cyan-500/30"
                           />
                           <span>{rep.full_name}</span>
                         </td>

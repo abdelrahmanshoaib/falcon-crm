@@ -67,7 +67,7 @@ export function SalesMagnetCard({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all shadow-md group">
+    <div className="glass-card glass-card-hover rounded-2xl overflow-hidden flex flex-col justify-between border border-white/10 shadow-lg group relative">
       <div>
         {/* Magnet Cover Image & Category Badge */}
         <div className="relative h-40 bg-slate-950 overflow-hidden">

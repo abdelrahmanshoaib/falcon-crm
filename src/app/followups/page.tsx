@@ -20,6 +20,7 @@ import {
   Building,
   User,
   Filter,
+  Sparkles,
 } from "lucide-react";
 
 function FollowUpsContent() {
@@ -94,17 +95,22 @@ function FollowUpsContent() {
   ).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-5">
       {/* 1. HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-4 sm:p-5 rounded-2xl glass-panel relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent pointer-events-none" />
+
         <div>
           <div className="flex items-center gap-2">
-            <CalendarCheck className="w-5 h-5 text-amber-400" />
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <div className="p-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
+              <CalendarCheck className="w-5 h-5" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
               {t("nav_followups")}
+              <Sparkles className="w-4 h-4 text-amber-400" />
             </h1>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-300/80 mt-1">
             Manage phone calls, catalog deliveries, demos, and post-exhibition actions.
           </p>
         </div>
@@ -114,7 +120,7 @@ function FollowUpsContent() {
             setCompletingTask(null);
             setModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-falcon-600 hover:bg-falcon-500 text-white font-semibold text-xs transition-all shadow-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-falcon-600 via-cyan-500 to-falcon-500 hover:brightness-110 text-white font-bold text-xs shadow-md shadow-falcon-600/30 border border-white/20 transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>Schedule New Task</span>
@@ -122,34 +128,34 @@ function FollowUpsContent() {
       </div>
 
       {/* 2. TABS BAR (TODAY, OVERDUE, UPCOMING, COMPLETED, ALL) */}
-      <div className="flex border-b border-slate-800 bg-slate-900 p-1.5 rounded-2xl gap-2 overflow-x-auto text-xs">
+      <div className="flex border border-white/10 glass-panel p-1.5 rounded-2xl gap-2 overflow-x-auto text-xs">
         <button
           onClick={() => setActiveTab("today")}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap ${
             activeTab === "today"
-              ? "bg-falcon-600 text-white shadow-sm"
+              ? "bg-gradient-to-r from-falcon-600 to-cyan-500 text-white shadow-[0_0_15px_rgba(14,165,233,0.35)] border border-white/20"
               : "text-slate-400 hover:text-white"
           }`}
         >
           <Clock className="w-3.5 h-3.5" />
           <span>{t("followup_today")}</span>
-          <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/20 font-mono">
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/30 border border-white/10 font-mono">
             {countToday}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab("overdue")}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap ${
             activeTab === "overdue"
-              ? "bg-rose-600 text-white shadow-sm"
+              ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.35)] border border-white/20"
               : "text-slate-400 hover:text-white"
           }`}
         >
           <AlertCircle className="w-3.5 h-3.5" />
           <span>{t("followup_overdue")}</span>
           {countOverdue > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white text-rose-600 font-bold font-mono">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white text-rose-600 font-black font-mono shadow-[0_0_8px_#f43f5e]">
               {countOverdue}
             </span>
           )}
@@ -157,9 +163,9 @@ function FollowUpsContent() {
 
         <button
           onClick={() => setActiveTab("upcoming")}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap ${
             activeTab === "upcoming"
-              ? "bg-slate-800 text-white shadow-sm"
+              ? "glass-pill text-white border-white/30"
               : "text-slate-400 hover:text-white"
           }`}
         >
@@ -168,9 +174,9 @@ function FollowUpsContent() {
 
         <button
           onClick={() => setActiveTab("completed")}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap ${
             activeTab === "completed"
-              ? "bg-emerald-600 text-white shadow-sm"
+              ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.35)] border border-white/20"
               : "text-slate-400 hover:text-white"
           }`}
         >
@@ -180,9 +186,9 @@ function FollowUpsContent() {
 
         <button
           onClick={() => setActiveTab("all")}
-          className={`px-3 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${
+          className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap ${
             activeTab === "all"
-              ? "bg-slate-800 text-white"
+              ? "glass-pill text-white border-white/30"
               : "text-slate-400 hover:text-white"
           }`}
         >
@@ -193,12 +199,12 @@ function FollowUpsContent() {
       {/* 3. TASK LIST */}
       <div className="space-y-3">
         {filteredList.length === 0 ? (
-          <div className="p-8 text-center bg-slate-900 rounded-2xl border border-slate-800 text-slate-400 space-y-2">
-            <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto opacity-60" />
-            <p className="text-sm font-semibold text-slate-300">
+          <div className="p-12 text-center glass-card rounded-2xl border border-white/10 text-slate-400 space-y-2">
+            <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto opacity-70" />
+            <p className="text-sm font-bold text-slate-200">
               No tasks found in this view
             </p>
-            <p className="text-xs">All caught up! Great job.</p>
+            <p className="text-xs text-slate-400">All caught up! Great job on your sales pipeline.</p>
           </div>
         ) : (
           filteredList.map((task) => {
@@ -209,24 +215,24 @@ function FollowUpsContent() {
             return (
               <div
                 key={task.id}
-                className={`p-4 rounded-2xl bg-slate-900 border transition-all shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                className={`p-4 sm:p-5 rounded-2xl glass-card glass-card-hover border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 relative overflow-hidden ${
                   isTaskOverdue
-                    ? "border-rose-500/40 bg-rose-950/10"
+                    ? "border-rose-500/40 bg-gradient-to-r from-rose-950/20 to-slate-950/80 shadow-[0_0_20px_rgba(244,63,94,0.15)]"
                     : isCompleted
-                    ? "border-slate-800/60 opacity-80"
-                    : "border-slate-800 hover:border-slate-700"
+                    ? "border-white/5 opacity-75"
+                    : "border-white/10"
                 }`}
               >
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-sm text-white">
+                    <span className="font-extrabold text-sm text-white">
                       {task.title}
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-white/5 text-cyan-300 border border-white/10">
                       {task.type.replace("_", " ")}
                     </span>
                     {task.priority === "high" && (
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-500/20 text-red-400">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/40 shadow-[0_0_8px_rgba(239,68,68,0.25)]">
                         HIGH
                       </span>
                     )}
@@ -236,33 +242,30 @@ function FollowUpsContent() {
                   <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
                     <button
                       onClick={() => setProfileLeadId(task.lead_id)}
-                      className="font-semibold text-falcon-400 hover:underline flex items-center gap-1"
+                      className="font-bold text-cyan-400 hover:underline flex items-center gap-1"
                     >
                       <User className="w-3.5 h-3.5" />
                       <span>{task.lead_name}</span>
                     </button>
 
                     {task.lead_company && (
-                      <span className="flex items-center gap-1">
-                        <Building className="w-3 h-3 text-slate-400" />
+                      <span className="flex items-center gap-1 text-slate-300">
+                        <Building className="w-3.5 h-3.5 text-slate-400" />
                         <span>{task.lead_company}</span>
                       </span>
                     )}
 
                     <span>•</span>
-                    <span>
-                      Scheduled:{" "}
-                      <strong className="text-slate-300 font-mono">
-                        {new Date(task.scheduled_at).toLocaleDateString()}{" "}
-                        {new Date(task.scheduled_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </strong>
+                    <span className="font-mono text-slate-300">
+                      {new Date(task.scheduled_at).toLocaleDateString()}{" "}
+                      {new Date(task.scheduled_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
 
                     <span>•</span>
-                    <span>
+                    <span className="text-cyan-300/80 font-medium">
                       {formatRelativeTime(task.scheduled_at, language === "ar")}
                     </span>
                   </div>
@@ -275,8 +278,8 @@ function FollowUpsContent() {
 
                   {/* Completed notes */}
                   {task.completion_notes && (
-                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80 text-xs text-slate-300 italic mt-2">
-                      <span className="text-emerald-400 not-italic font-semibold block text-[11px] mb-0.5">
+                    <div className="p-3 rounded-xl bg-white/[0.03] border border-emerald-500/30 text-xs text-slate-200 mt-2">
+                      <span className="text-emerald-400 font-bold block text-[11px] mb-0.5">
                         Completion Log:
                       </span>
                       {task.completion_notes}
@@ -290,7 +293,7 @@ function FollowUpsContent() {
                     <>
                       <a
                         href={`tel:${task.lead_phone}`}
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 transition-colors"
+                        className="p-2.5 rounded-xl glass-pill text-blue-400 hover:text-white transition-all active:scale-95"
                         title="Call"
                       >
                         <Phone className="w-4 h-4" />
@@ -299,7 +302,7 @@ function FollowUpsContent() {
                         href={`https://wa.me/${task.lead_phone.replace(/[^0-9]/g, "")}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="p-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 transition-colors"
+                        className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 transition-all active:scale-95"
                         title="WhatsApp"
                       >
                         <MessageCircle className="w-4 h-4" />
@@ -313,7 +316,7 @@ function FollowUpsContent() {
                         setCompletingTask(task);
                         setModalOpen(true);
                       }}
-                      className="px-3.5 py-2 rounded-xl bg-falcon-600 hover:bg-falcon-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-110 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-600/30 border border-white/20 active:scale-95"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>{t("mark_completed")}</span>
@@ -350,7 +353,7 @@ function FollowUpsContent() {
 
 export default function FollowUpsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading Follow-ups...</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-slate-400">Loading Follow-ups...</div>}>
       <FollowUpsContent />
     </Suspense>
   );

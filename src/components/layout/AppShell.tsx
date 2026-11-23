@@ -61,11 +61,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-falcon-600 selection:text-white">
+    <div className="min-h-screen bg-[#060913] text-slate-100 flex flex-col font-sans selection:bg-falcon-500 selection:text-white relative">
+      {/* AMBIENT LUXURY GLASS GLOW MESH */}
+      <div className="ambient-glow-mesh" aria-hidden="true" />
+      <div className="ambient-glow-bottom" aria-hidden="true" />
+
       {/* 1. TOP ROLE & ENVIRONMENT BAR */}
       <RolePreviewBar />
 
-      <div className="flex flex-1 relative overflow-hidden">
+      <div className="flex flex-1 relative z-10 overflow-hidden">
         {/* 2. DESKTOP SIDEBAR */}
         <Sidebar
           onOpenQuickAdd={() => setIsQuickAddOpen(true)}
@@ -73,16 +77,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         />
 
         {/* 3. MAIN CONTENT AREA */}
-        <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
+        <div className="flex-1 flex flex-col min-w-0 pb-28 lg:pb-0">
           <Navbar onOpenQuickAdd={() => setIsQuickAddOpen(true)} />
 
-          <main className="flex-1 p-3 sm:p-5 lg:p-6 overflow-y-auto max-w-7xl w-full mx-auto">
+          <main className="flex-1 p-3.5 sm:p-5 lg:p-7 overflow-y-auto max-w-7xl w-full mx-auto relative z-10">
             {children}
           </main>
         </div>
       </div>
 
-      {/* 4. MOBILE BOTTOM NAVIGATION */}
+      {/* 4. MOBILE BOTTOM NAVIGATION DOCK */}
       <BottomNav
         onOpenQuickAdd={() => setIsQuickAddOpen(true)}
         overdueCount={overdueCount}

@@ -161,25 +161,28 @@ export function WhatsAppQRModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto ${
+      className={`fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto ${
         isFullScreen ? "p-0" : ""
       }`}
     >
       <div
-        className={`bg-slate-900 border border-slate-800 text-white shadow-2xl flex flex-col ${
+        className={`glass-modal border border-white/20 text-white shadow-[0_25px_60px_rgba(0,0,0,0.85)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200 ${
           isFullScreen
             ? "w-screen h-screen rounded-none max-w-none"
-            : "w-full max-w-2xl rounded-2xl max-h-[92vh] overflow-hidden my-auto"
+            : "w-full max-w-2xl rounded-[28px] max-h-[92vh] overflow-hidden my-auto"
         }`}
       >
+        {/* Specular Edge Highlight */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none" />
+
         {/* HEADER */}
-        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-white/10 bg-white/[0.02] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-              <MessageCircle className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+              <MessageCircle className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-white">
+              <h2 className="font-extrabold text-sm sm:text-base text-white">
                 {t("qr_center_title")}
               </h2>
               <p className="text-[11px] text-slate-400">
@@ -191,7 +194,7 @@ export function WhatsAppQRModal({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsFullScreen(!isFullScreen)}
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+              className="p-2 rounded-xl glass-pill text-slate-300 hover:text-white transition-all active:scale-95"
               title={isFullScreen ? "Exit Full Screen" : "Full Screen Booth Mode"}
             >
               {isFullScreen ? (
@@ -203,9 +206,9 @@ export function WhatsAppQRModal({
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="p-2 rounded-xl glass-pill text-slate-400 hover:text-white transition-all active:scale-95"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>

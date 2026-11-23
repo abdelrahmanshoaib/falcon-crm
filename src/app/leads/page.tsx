@@ -25,6 +25,8 @@ import {
   ChevronDown,
   ArrowUpDown,
   FileSpreadsheet,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
 
 function LeadsContent() {
@@ -177,14 +179,19 @@ function LeadsContent() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-5">
       {/* 1. TOP HEADER & EXPORT */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl glass-panel relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none" />
+
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            {t("nav_leads")} ({filteredLeads.length})
+          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            {t("nav_leads")}
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              {filteredLeads.length}
+            </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-300/80 mt-0.5">
             Search, qualify, filter, and take instant action on exhibition prospects.
           </p>
         </div>
@@ -193,7 +200,7 @@ function LeadsContent() {
           {can("view_all_leads") && (
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl glass-pill text-slate-200 hover:text-white text-xs font-bold transition-all active:scale-95"
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
               <span>{t("export_csv")}</span>
@@ -203,7 +210,7 @@ function LeadsContent() {
       </div>
 
       {/* 2. SEARCH & FILTER TOOLBAR */}
-      <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-3">
+      <div className="p-3.5 sm:p-4 rounded-2xl glass-card space-y-3 relative overflow-hidden">
         <div className="flex flex-col sm:flex-row gap-2.5">
           {/* Search Input */}
           <div className="flex-1 relative">
@@ -213,7 +220,7 @@ function LeadsContent() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by customer name, phone, company, email, city..."
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2 text-xs text-white focus:outline-none focus:border-falcon-500 placeholder-slate-500"
+              className="w-full glass-input rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2 text-xs text-white focus:outline-none placeholder-slate-400"
             />
           </div>
 
@@ -223,60 +230,60 @@ function LeadsContent() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-falcon-500"
+              className="glass-input rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
             >
-              <option value="newest">Sort: Newest First</option>
-              <option value="score_high">Sort: Highest Score</option>
-              <option value="hot_first">Sort: HOT Leads First</option>
-              <option value="company">Sort: Company Name</option>
+              <option value="newest" className="bg-slate-900">Sort: Newest First</option>
+              <option value="score_high" className="bg-slate-900">Sort: Highest Score</option>
+              <option value="hot_first" className="bg-slate-900">Sort: HOT Leads First</option>
+              <option value="company" className="bg-slate-900">Sort: Company Name</option>
             </select>
           </div>
         </div>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap items-center gap-2 text-xs pt-1 border-t border-slate-800/80">
-          <span className="text-slate-400 flex items-center gap-1 text-[11px]">
-            <Filter className="w-3 h-3" /> Filters:
+        <div className="flex flex-wrap items-center gap-2 text-xs pt-2 border-t border-white/10">
+          <span className="text-slate-400 flex items-center gap-1 text-[11px] font-semibold">
+            <Filter className="w-3 h-3 text-cyan-400" /> Filters:
           </span>
 
           {/* Temperature */}
           <select
             value={tempFilter}
             onChange={(e) => setTempFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-slate-300 text-xs"
+            className="glass-input rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none"
           >
-            <option value="all">All Temperatures</option>
-            <option value="HOT">HOT (70-100)</option>
-            <option value="WARM">WARM (40-69)</option>
-            <option value="COLD">COLD (0-39)</option>
+            <option value="all" className="bg-slate-900">All Temperatures</option>
+            <option value="HOT" className="bg-slate-900">HOT (70-100)</option>
+            <option value="WARM" className="bg-slate-900">WARM (40-69)</option>
+            <option value="COLD" className="bg-slate-900">COLD (0-39)</option>
           </select>
 
           {/* Stage */}
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-slate-300 text-xs"
+            className="glass-input rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none"
           >
-            <option value="all">All Pipeline Stages</option>
-            <option value="new_lead">New Lead</option>
-            <option value="contacted">Contacted</option>
-            <option value="qualified">Qualified</option>
-            <option value="consultation">Consultation</option>
-            <option value="quotation_sent">Quotation Sent</option>
-            <option value="negotiation">Negotiation</option>
-            <option value="won">Won Deal</option>
-            <option value="lost">Lost Deal</option>
+            <option value="all" className="bg-slate-900">All Pipeline Stages</option>
+            <option value="new_lead" className="bg-slate-900">New Lead</option>
+            <option value="contacted" className="bg-slate-900">Contacted</option>
+            <option value="qualified" className="bg-slate-900">Qualified</option>
+            <option value="consultation" className="bg-slate-900">Consultation</option>
+            <option value="quotation_sent" className="bg-slate-900">Quotation Sent</option>
+            <option value="negotiation" className="bg-slate-900">Negotiation</option>
+            <option value="won" className="bg-slate-900">Won Deal</option>
+            <option value="lost" className="bg-slate-900">Lost Deal</option>
           </select>
 
           {/* Exhibition */}
           <select
             value={exhibitionFilter}
             onChange={(e) => setExhibitionFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-slate-300 text-xs"
+            className="glass-input rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none"
           >
-            <option value="all">All Exhibitions</option>
+            <option value="all" className="bg-slate-900">All Exhibitions</option>
             {exhibitions.map((ex) => (
-              <option key={ex.id} value={ex.id}>
+              <option key={ex.id} value={ex.id} className="bg-slate-900">
                 {ex.name}
               </option>
             ))}
@@ -291,7 +298,7 @@ function LeadsContent() {
                 setExhibitionFilter("all");
                 setSearch("");
               }}
-              className="text-[11px] text-rose-400 hover:underline px-2 py-0.5"
+              className="text-[11px] text-rose-400 hover:text-rose-300 hover:underline px-2 py-0.5 font-semibold"
             >
               {t("clear_filters")}
             </button>
@@ -299,14 +306,14 @@ function LeadsContent() {
         </div>
       </div>
 
-      {/* 3. LEADS LIST (RESPONSIVE TABLE DESKTOP / CARD LIST MOBILE) */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+      {/* 3. LEADS LIST */}
+      <div className="glass-panel rounded-2xl overflow-hidden shadow-lg">
         {filteredLeads.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 space-y-2">
-            <p className="text-sm font-semibold text-slate-300">
+          <div className="p-12 text-center text-slate-400 space-y-2">
+            <p className="text-sm font-bold text-slate-200">
               {t("no_records")}
             </p>
-            <p className="text-xs">
+            <p className="text-xs text-slate-400">
               Try adjusting your search criteria or capture a new lead.
             </p>
           </div>
@@ -315,18 +322,18 @@ function LeadsContent() {
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-xs text-left rtl:text-right">
-                <thead className="bg-slate-950 border-b border-slate-800 text-slate-400">
+                <thead className="bg-white/[0.03] border-b border-white/10 text-slate-400">
                   <tr>
                     <th className="py-3 px-4 font-semibold">Customer / Company</th>
-                    <th className="py-3 px-3 font-semibold">Phone / City</th>
-                    <th className="py-3 px-3 font-semibold">Machine Interest</th>
+                    <th className="py-3 px-3 font-semibold">Contact &amp; City</th>
+                    <th className="py-3 px-3 font-semibold">Interested Machine</th>
                     <th className="py-3 px-3 font-semibold text-center">Score / Temp</th>
                     <th className="py-3 px-3 font-semibold">Stage</th>
-                    <th className="py-3 px-3 font-semibold">Owner</th>
-                    <th className="py-3 px-4 font-semibold text-right rtl:text-left">Actions</th>
+                    <th className="py-3 px-3 font-semibold">Sales Owner</th>
+                    <th className="py-3 px-4 font-semibold text-right rtl:text-left">Quick Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-white/5">
                   {filteredLeads.map((lead) => {
                     const cleanPhone = lead.phone.replace(/[^0-9]/g, "");
                     return (
@@ -336,10 +343,10 @@ function LeadsContent() {
                           setSelectedLeadId(lead.id);
                           setIsProfileOpen(true);
                         }}
-                        className="hover:bg-slate-800/40 cursor-pointer transition-colors group"
+                        className="hover:bg-white/[0.04] transition-colors cursor-pointer group"
                       >
                         <td className="py-3 px-4">
-                          <div className="font-bold text-white group-hover:text-falcon-400 transition-colors">
+                          <div className="font-bold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
                             {lead.full_name}
                           </div>
                           {lead.company_name && (
@@ -350,7 +357,7 @@ function LeadsContent() {
                           )}
                         </td>
 
-                        <td className="py-3 px-3 font-mono text-slate-300">
+                        <td className="py-3 px-3 font-mono text-slate-200">
                           <div>{lead.phone}</div>
                           <div className="text-[11px] text-slate-400 font-sans">
                             {lead.city || "Cairo"}
@@ -358,7 +365,7 @@ function LeadsContent() {
                         </td>
 
                         <td className="py-3 px-3">
-                          <span className="font-semibold text-falcon-300">
+                          <span className="font-semibold text-cyan-300">
                             {lead.interested_machine_names?.[0] || "Custom Inquiry"}
                           </span>
                         </td>
@@ -374,7 +381,7 @@ function LeadsContent() {
                           <StageBadge stage={lead.sales_stage} />
                         </td>
 
-                        <td className="py-3 px-3 text-slate-400">
+                        <td className="py-3 px-3 text-slate-300">
                           {lead.sales_owner_name || "Sales Rep"}
                         </td>
 
@@ -385,7 +392,7 @@ function LeadsContent() {
                           <div className="flex items-center justify-end rtl:justify-start gap-1">
                             <a
                               href={`tel:${lead.phone}`}
-                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400"
+                              className="p-1.5 rounded-lg glass-pill text-blue-400 hover:text-white"
                               title={t("call")}
                             >
                               <Phone className="w-3.5 h-3.5" />
@@ -395,7 +402,7 @@ function LeadsContent() {
                               href={`https://wa.me/${cleanPhone}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50"
+                              className="p-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
                               title={t("whatsapp")}
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
@@ -406,7 +413,7 @@ function LeadsContent() {
                                 setActionLead(lead);
                                 setIsFollowUpOpen(true);
                               }}
-                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400"
+                              className="p-1.5 rounded-lg glass-pill text-amber-400 hover:text-white"
                               title={t("schedule_followup")}
                             >
                               <CalendarPlus className="w-3.5 h-3.5" />
@@ -417,7 +424,7 @@ function LeadsContent() {
                                 setActionLead(lead);
                                 setIsQROpen(true);
                               }}
-                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-falcon-400"
+                              className="p-1.5 rounded-lg glass-pill text-cyan-400 hover:text-white"
                               title={t("generate_qr")}
                             >
                               <QrCode className="w-3.5 h-3.5" />
@@ -431,8 +438,8 @@ function LeadsContent() {
               </table>
             </div>
 
-            {/* Mobile Card List View */}
-            <div className="md:hidden divide-y divide-slate-800">
+            {/* Mobile Luxury Glass Cards View */}
+            <div className="md:hidden p-3 space-y-3">
               {filteredLeads.map((lead) => {
                 const cleanPhone = lead.phone.replace(/[^0-9]/g, "");
                 return (
@@ -442,65 +449,98 @@ function LeadsContent() {
                       setSelectedLeadId(lead.id);
                       setIsProfileOpen(true);
                     }}
-                    className="p-3.5 space-y-2.5 active:bg-slate-800/50 cursor-pointer"
+                    className="p-4 rounded-2xl glass-card glass-card-hover space-y-3 cursor-pointer relative overflow-hidden"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="font-bold text-sm text-white">
-                          {lead.full_name}
-                        </h3>
-                        {lead.company_name && (
-                          <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                            <Building className="w-3 h-3 text-slate-400" />
-                            {lead.company_name}
-                          </p>
-                        )}
+                    {/* Top Accent Highlight */}
+                    <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent pointer-events-none" />
+
+                    {/* Card Header: Avatar Initial, Name, Temp Badge */}
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-falcon-600 via-cyan-500 to-indigo-600 p-[1px] shadow-md shadow-falcon-600/20 shrink-0">
+                          <div className="w-full h-full rounded-2xl bg-slate-950 flex items-center justify-center text-white font-extrabold text-sm font-mono">
+                            {lead.full_name.charAt(0)}
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-white tracking-wide">
+                            {lead.full_name}
+                          </h3>
+                          {lead.company_name && (
+                            <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                              <Building className="w-3 h-3 text-slate-400" />
+                              <span className="truncate max-w-[170px]">{lead.company_name}</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
+
                       <TemperatureBadge
                         temperature={lead.temperature}
                         score={lead.lead_score}
                       />
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-slate-300">
-                      <span className="font-mono">{lead.phone}</span>
-                      <span className="text-slate-400">{lead.city}</span>
+                    {/* Meta Row: Phone, City, Machine */}
+                    <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-1.5 text-xs">
+                      <div className="flex items-center justify-between text-slate-300">
+                        <span className="font-mono text-cyan-300">{lead.phone}</span>
+                        <span className="text-slate-400 text-[11px] flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {lead.city || "Cairo"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                        <span className="font-semibold text-white truncate max-w-[180px]">
+                          {lead.interested_machine_names?.[0] || "Custom CNC"}
+                        </span>
+                        <StageBadge stage={lead.sales_stage} />
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-xs">
-                      <span className="text-falcon-400 font-medium">
-                        {lead.interested_machine_names?.[0] || "Custom CNC"}
-                      </span>
-                      <StageBadge stage={lead.sales_stage} />
-                    </div>
-
-                    {/* Mobile Quick Action Buttons */}
+                    {/* Mobile Quick Action Buttons Row */}
                     <div
-                      className="flex items-center gap-1.5 pt-1"
+                      className="grid grid-cols-4 gap-2 pt-1"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="flex-1 py-1.5 rounded-lg bg-slate-800 text-emerald-400 text-xs font-semibold flex items-center justify-center gap-1"
-                      >
-                        <Phone className="w-3.5 h-3.5" /> Call
-                      </a>
                       <a
                         href={`https://wa.me/${cleanPhone}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex-1 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 text-xs font-semibold flex items-center justify-center gap-1"
+                        className="py-2 px-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-95 transition-all shadow-sm"
                       >
-                        <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>واتساب</span>
                       </a>
+
+                      <a
+                        href={`tel:${lead.phone}`}
+                        className="py-2 px-1 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-95 transition-all shadow-sm"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>اتصال</span>
+                      </a>
+
+                      <button
+                        onClick={() => {
+                          setActionLead(lead);
+                          setIsFollowUpOpen(true);
+                        }}
+                        className="py-2 px-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-95 transition-all shadow-sm"
+                      >
+                        <CalendarPlus className="w-3.5 h-3.5" />
+                        <span>متابعة</span>
+                      </button>
+
                       <button
                         onClick={() => {
                           setActionLead(lead);
                           setIsQROpen(true);
                         }}
-                        className="p-1.5 rounded-lg bg-slate-800 text-falcon-400"
+                        className="py-2 px-1 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-95 transition-all shadow-sm"
                       >
-                        <QrCode className="w-4 h-4" />
+                        <QrCode className="w-3.5 h-3.5" />
+                        <span>QR</span>
                       </button>
                     </div>
                   </div>
@@ -557,7 +597,7 @@ function LeadsContent() {
 
 export default function LeadsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading Leads...</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-slate-400">Loading Leads...</div>}>
       <LeadsContent />
     </Suspense>
   );

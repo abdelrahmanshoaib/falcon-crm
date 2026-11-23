@@ -154,16 +154,19 @@ export function FollowUpModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg text-white shadow-2xl overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+      <div className="glass-modal border border-white/20 rounded-[28px] w-full max-w-lg text-white shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden my-auto relative animate-in fade-in zoom-in-95 duration-200">
+        {/* Specular Edge Highlight */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent pointer-events-none" />
+
         {/* HEADER */}
-        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-              <CalendarCheck className="w-4 h-4" />
+        <div className="p-4 sm:p-5 border-b border-white/10 bg-white/[0.02] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+              <CalendarCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-white">
+              <h2 className="font-extrabold text-sm sm:text-base text-white">
                 {isCompleting ? "Complete Follow-up Task" : "Schedule New Follow-up"}
               </h2>
               <p className="text-[11px] text-slate-400">
@@ -178,9 +181,9 @@ export function FollowUpModal({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+            className="p-2 rounded-xl glass-pill text-slate-400 hover:text-white transition-all active:scale-95"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 

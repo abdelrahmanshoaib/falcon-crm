@@ -33,6 +33,7 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
+  Sparkles,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/lib/utils";
 import { TemperatureBadge } from "../common/Badges";
@@ -177,29 +178,38 @@ export function QuickLeadModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl text-white shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+      <div className="glass-modal rounded-[28px] w-full max-w-xl text-white shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden my-auto border border-white/20 relative animate-in fade-in zoom-in-95 duration-200">
+        {/* Specular Edge Highlight */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent pointer-events-none" />
+
         {/* POST-SAVE ACTION SCREEN */}
         {savedLead ? (
-          <div className="p-6 text-center space-y-5">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500/50 flex items-center justify-center mx-auto text-emerald-400">
-              <CheckCircle2 className="w-9 h-9" />
+          <div className="p-6 sm:p-8 text-center space-y-5">
+            <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl animate-pulse" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-950/60 border-2 border-emerald-400/50 flex items-center justify-center text-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
+                <CheckCircle2 className="w-9 h-9 sm:w-11 sm:h-11" />
+              </div>
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
                 {t("post_save_title")}
+                <Sparkles className="w-5 h-5 text-amber-400" />
               </h3>
-              <p className="text-sm text-slate-300 mt-1 font-medium">
+              <p className="text-sm sm:text-base text-slate-200 mt-1 font-bold">
                 {savedLead.full_name}{" "}
-                {savedLead.company_name && `(${savedLead.company_name})`}
+                {savedLead.company_name && (
+                  <span className="text-cyan-300 font-normal">({savedLead.company_name})</span>
+                )}
               </p>
               <div className="flex items-center justify-center gap-2 mt-2">
                 <TemperatureBadge
                   temperature={savedLead.temperature}
                   score={savedLead.lead_score}
                 />
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-400 font-mono">
                   {savedLead.interested_machine_names?.[0]}
                 </span>
               </div>
@@ -214,9 +224,11 @@ export function QuickLeadModal({
                   onClose();
                   resetForm();
                 }}
-                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-semibold text-white gap-1.5"
+                className="flex flex-col items-center justify-center p-3.5 rounded-2xl glass-card glass-card-hover transition-all text-xs font-bold text-white gap-2"
               >
-                <CalendarPlus className="w-5 h-5 text-amber-400" />
+                <div className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                  <CalendarPlus className="w-5 h-5" />
+                </div>
                 <span>{t("action_create_followup")}</span>
               </button>
 
@@ -227,9 +239,11 @@ export function QuickLeadModal({
                   onClose();
                   resetForm();
                 }}
-                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-semibold text-white gap-1.5"
+                className="flex flex-col items-center justify-center p-3.5 rounded-2xl glass-card glass-card-hover transition-all text-xs font-bold text-white gap-2"
               >
-                <QrCode className="w-5 h-5 text-falcon-400" />
+                <div className="p-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+                  <QrCode className="w-5 h-5" />
+                </div>
                 <span>{t("action_make_qr")}</span>
               </button>
 
@@ -240,18 +254,20 @@ export function QuickLeadModal({
                   onClose();
                   resetForm();
                 }}
-                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-semibold text-white gap-1.5"
+                className="flex flex-col items-center justify-center p-3.5 rounded-2xl glass-card glass-card-hover transition-all text-xs font-bold text-white gap-2"
               >
-                <FileText className="w-5 h-5 text-emerald-400" />
+                <div className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  <FileText className="w-5 h-5" />
+                </div>
                 <span>{t("action_open_profile")}</span>
               </button>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+            <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-falcon-600 hover:bg-falcon-500 text-white text-xs font-semibold"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-falcon-600 to-cyan-500 hover:brightness-110 text-white text-xs font-bold shadow-md shadow-falcon-600/30 border border-white/20"
               >
                 <Plus className="w-4 h-4" />
                 <span>{t("action_capture_another")}</span>
@@ -263,7 +279,7 @@ export function QuickLeadModal({
                   onClose();
                   resetForm();
                 }}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                className="px-4 py-2.5 rounded-xl glass-pill text-slate-300 hover:text-white text-xs font-semibold"
               >
                 {t("close")}
               </button>
@@ -271,16 +287,19 @@ export function QuickLeadModal({
           </div>
         ) : (
           /* QUICK LEAD CAPTURE FORM (<60s) */
-          <form onSubmit={handleSave} className="flex flex-col max-h-[90vh]">
+          <form onSubmit={handleSave} className="flex flex-col max-h-[92vh]">
             {/* Modal Header */}
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-falcon-600/20 border border-falcon-500/40 flex items-center justify-center text-falcon-400">
-                  <Zap className="w-4 h-4" />
+            <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-falcon-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-falcon-500/30 border border-white/20">
+                  <Zap className="w-5 h-5 fill-white" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-sm sm:text-base text-white leading-tight">
+                  <h2 className="font-extrabold text-sm sm:text-base text-white leading-tight flex items-center gap-1.5">
                     {t("quick_lead_title")}
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">
+                      &lt;60s
+                    </span>
                   </h2>
                   <p className="text-[11px] text-slate-400">
                     {t("quick_lead_subtitle")}
@@ -291,15 +310,15 @@ export function QuickLeadModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-white glass-pill transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* DUPLICATE WARNING BANNER */}
             {duplicateLead && !bypassDuplicate && (
-              <div className="m-4 mb-0 p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs space-y-2">
+              <div className="m-4 mb-0 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs space-y-2 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                   <div>
@@ -312,7 +331,7 @@ export function QuickLeadModal({
                   </div>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-black/40 border border-amber-500/20 text-[11px] space-y-1">
+                <div className="p-2.5 rounded-xl bg-black/40 border border-amber-500/20 text-[11px] space-y-1">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Existing Customer:</span>
                     <span className="font-semibold text-white">
@@ -325,7 +344,7 @@ export function QuickLeadModal({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Current Stage:</span>
-                    <span className="capitalize">{duplicateLead.sales_stage.replace("_", " ")}</span>
+                    <span className="capitalize text-amber-300 font-semibold">{duplicateLead.sales_stage.replace("_", " ")}</span>
                   </div>
                 </div>
 
@@ -336,7 +355,7 @@ export function QuickLeadModal({
                       if (onActionSelect) onActionSelect("profile", duplicateLead);
                       onClose();
                     }}
-                    className="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-[11px] text-center"
+                    className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs text-center transition-colors shadow-md"
                   >
                     {t("duplicate_view_existing")}
                   </button>
@@ -344,7 +363,7 @@ export function QuickLeadModal({
                   <button
                     type="button"
                     onClick={() => setBypassDuplicate(true)}
-                    className="py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px]"
+                    className="py-2 px-3 rounded-xl glass-pill text-slate-300 text-xs font-semibold"
                   >
                     {t("duplicate_continue_save")}
                   </button>
@@ -353,21 +372,21 @@ export function QuickLeadModal({
             )}
 
             {/* FORM BODY */}
-            <div className="p-4 space-y-3.5 overflow-y-auto flex-1">
+            <div className="p-4 sm:p-5 space-y-3.5 overflow-y-auto flex-1">
               {/* 1. Full Name (Required) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   {t("field_customer_name")} <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 rtl:left-auto rtl:right-3 top-3 pointer-events-none" />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3.5 pointer-events-none" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder={t("field_customer_name_placeholder")}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2.5 text-sm text-white focus:outline-none focus:border-falcon-500 focus:ring-1 focus:ring-falcon-500 placeholder-slate-500"
+                    className="w-full glass-input rounded-xl pl-10 pr-3.5 rtl:pl-3.5 rtl:pr-10 py-3 text-sm text-white focus:outline-none placeholder-slate-500"
                   />
                 </div>
               </div>
@@ -378,7 +397,7 @@ export function QuickLeadModal({
                   {t("field_phone")} <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 rtl:left-auto rtl:right-3 top-3 pointer-events-none" />
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3.5 pointer-events-none" />
                   <input
                     type="tel"
                     inputMode="tel"
@@ -386,10 +405,10 @@ export function QuickLeadModal({
                     value={phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
                     placeholder={t("field_phone_placeholder")}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-falcon-500 focus:ring-1 focus:ring-falcon-500 placeholder-slate-500 tracking-wide"
+                    className="w-full glass-input rounded-xl pl-10 pr-3.5 rtl:pl-3.5 rtl:pr-10 py-3 text-base sm:text-sm font-mono text-cyan-300 focus:outline-none placeholder-slate-500 tracking-wider font-bold"
                   />
                   {isCheckingDuplicate && (
-                    <span className="absolute right-3 rtl:right-auto rtl:left-3 top-3 text-[11px] text-slate-400">
+                    <span className="absolute right-3 rtl:right-auto rtl:left-3 top-3.5 text-[11px] text-cyan-400 font-mono animate-pulse">
                       Checking...
                     </span>
                   )}
@@ -409,7 +428,7 @@ export function QuickLeadModal({
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       placeholder={t("field_company_placeholder")}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2 text-sm text-white focus:outline-none focus:border-falcon-500 placeholder-slate-500"
+                      className="w-full glass-input rounded-xl pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2.5 text-xs text-white focus:outline-none placeholder-slate-500"
                     />
                   </div>
                 </div>
@@ -421,17 +440,17 @@ export function QuickLeadModal({
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-falcon-500"
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
                   >
-                    <option value="Damietta">Damietta (دمياط)</option>
-                    <option value="10th of Ramadan">10th of Ramadan (العاشر من رمضان)</option>
-                    <option value="6th of October">6th of October (السادس من أكتوبر)</option>
-                    <option value="Cairo">Cairo (القاهرة)</option>
-                    <option value="Alexandria">Alexandria (الإسكندرية)</option>
-                    <option value="Sadat City">Sadat City (مدينة السادات)</option>
-                    <option value="Obour">Obour City (العبور)</option>
-                    <option value="Giza">Giza (الجيزة)</option>
-                    <option value="Other">Other Region</option>
+                    <option value="Damietta" className="bg-slate-900">Damietta (دمياط)</option>
+                    <option value="10th of Ramadan" className="bg-slate-900">10th of Ramadan (العاشر من رمضان)</option>
+                    <option value="6th of October" className="bg-slate-900">6th of October (السادس من أكتوبر)</option>
+                    <option value="Cairo" className="bg-slate-900">Cairo (القاهرة)</option>
+                    <option value="Alexandria" className="bg-slate-900">Alexandria (الإسكندرية)</option>
+                    <option value="Sadat City" className="bg-slate-900">Sadat City (مدينة السادات)</option>
+                    <option value="Obour" className="bg-slate-900">Obour City (العبور)</option>
+                    <option value="Giza" className="bg-slate-900">Giza (الجيزة)</option>
+                    <option value="Other" className="bg-slate-900">Other Region</option>
                   </select>
                 </div>
               </div>
@@ -445,14 +464,14 @@ export function QuickLeadModal({
                   <select
                     value={selectedMachine}
                     onChange={(e) => setSelectedMachine(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-falcon-500"
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
                   >
                     {machines.map((m) => (
-                      <option key={m.id} value={m.name}>
+                      <option key={m.id} value={m.name} className="bg-slate-900">
                         {m.name} ({m.category})
                       </option>
                     ))}
-                    <option value="Other Machine">Other Custom Machine</option>
+                    <option value="Other Machine" className="bg-slate-900">Other Custom Machine</option>
                   </select>
                 </div>
 
@@ -460,48 +479,50 @@ export function QuickLeadModal({
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
                     {t("field_temperature")}
                   </label>
-                  <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-700">
+                  <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
                     <button
                       type="button"
                       onClick={() => setTemperature("HOT")}
-                      className={`flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
                         temperature === "HOT"
-                          ? "bg-red-600 text-white shadow-sm"
+                          ? "bg-red-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.5)] border border-red-400"
                           : "text-slate-400 hover:text-white"
                       }`}
                     >
-                      <Flame className="w-3.5 h-3.5" />
-                      HOT
+                      <Flame className="w-3.5 h-3.5 text-white" />
+                      <span>HOT</span>
                     </button>
+
                     <button
                       type="button"
                       onClick={() => setTemperature("WARM")}
-                      className={`flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
                         temperature === "WARM"
-                          ? "bg-amber-600 text-white shadow-sm"
+                          ? "bg-amber-500 text-slate-950 shadow-[0_0_12px_rgba(245,158,11,0.5)] border border-amber-300"
                           : "text-slate-400 hover:text-white"
                       }`}
                     >
                       <ThermometerSun className="w-3.5 h-3.5" />
-                      WARM
+                      <span>WARM</span>
                     </button>
+
                     <button
                       type="button"
                       onClick={() => setTemperature("COLD")}
-                      className={`flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all ${
                         temperature === "COLD"
-                          ? "bg-blue-600 text-white shadow-sm"
+                          ? "bg-cyan-500 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.5)] border border-cyan-300"
                           : "text-slate-400 hover:text-white"
                       }`}
                     >
                       <Snowflake className="w-3.5 h-3.5" />
-                      COLD
+                      <span>COLD</span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* 5. Quick Booth Notes */}
+              {/* 5. Notes */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   {t("field_quick_notes")}
@@ -511,50 +532,47 @@ export function QuickLeadModal({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={t("field_quick_notes_placeholder")}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-falcon-500 placeholder-slate-500"
+                  className="w-full glass-input rounded-xl p-3 text-xs text-white focus:outline-none placeholder-slate-500"
                 />
               </div>
 
-              {/* 6. PROGRESSIVE DISCLOSURE TOGGLE (Deep Qualification) */}
+              {/* PROGRESSIVE DISCLOSURE - FULL QUALIFICATION DETAILS */}
               <div className="pt-1">
                 <button
                   type="button"
                   onClick={() => setShowFullDetails(!showFullDetails)}
-                  className="flex items-center justify-between w-full p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors"
+                  className="flex items-center justify-between w-full py-2 px-3 rounded-xl glass-pill text-xs font-semibold text-cyan-300 transition-all"
                 >
-                  <span className="font-semibold">
-                    {showFullDetails
-                      ? "Hide Advanced Qualification Options"
-                      : "Add Deep Qualification & B2B Details (+Scoring)"}
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    {showFullDetails ? "Hide In-Depth Qualification" : "Add In-Depth B2B Qualification (Optional)"}
                   </span>
                   {showFullDetails ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                    <ChevronUp className="w-4 h-4" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-4 h-4" />
                   )}
                 </button>
 
                 {showFullDetails && (
-                  <div className="p-3 mt-2 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
-                    {/* Factory Status */}
-                    <div>
-                      <label className="block text-slate-400 mb-1 font-medium">
-                        {t("q_factory_status")}
-                      </label>
-                      <select
-                        value={factoryStatus}
-                        onChange={(e) => setFactoryStatus(e.target.value as FactoryStatus)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
-                      >
-                        <option value="yes">{t("q_factory_yes")}</option>
-                        <option value="under_construction">{t("q_factory_construction")}</option>
-                        <option value="planning">{t("q_factory_planning")}</option>
-                        <option value="no">{t("q_factory_no")}</option>
-                      </select>
-                    </div>
+                  <div className="mt-3 p-3.5 rounded-2xl glass-card space-y-3 animate-in fade-in duration-200 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-slate-400 mb-1 font-medium">
+                          {t("q_factory_status")}
+                        </label>
+                        <select
+                          value={factoryStatus}
+                          onChange={(e) => setFactoryStatus(e.target.value as FactoryStatus)}
+                          className="w-full glass-input rounded-lg p-2 text-white"
+                        >
+                          <option value="yes" className="bg-slate-900">{t("q_factory_yes")}</option>
+                          <option value="under_construction" className="bg-slate-900">{t("q_factory_construction")}</option>
+                          <option value="planning" className="bg-slate-900">{t("q_factory_planning")}</option>
+                          <option value="no" className="bg-slate-900">{t("q_factory_no")}</option>
+                        </select>
+                      </div>
 
-                    {/* Purchase Intent & Timeline */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block text-slate-400 mb-1 font-medium">
                           {t("q_purchase_intent")}
@@ -562,12 +580,12 @@ export function QuickLeadModal({
                         <select
                           value={purchaseIntent}
                           onChange={(e) => setPurchaseIntent(e.target.value as PurchaseIntent)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
+                          className="w-full glass-input rounded-lg p-2 text-white"
                         >
-                          <option value="ready_to_buy">{t("q_intent_ready")}</option>
-                          <option value="comparing_options">{t("q_intent_comparing")}</option>
-                          <option value="planning_future">{t("q_intent_future")}</option>
-                          <option value="general_interest">{t("q_intent_general")}</option>
+                          <option value="ready_to_buy" className="bg-slate-900">{t("q_intent_ready")}</option>
+                          <option value="comparing" className="bg-slate-900">{t("q_intent_comparing")}</option>
+                          <option value="future_planning" className="bg-slate-900">{t("q_intent_future")}</option>
+                          <option value="browsing" className="bg-slate-900">{t("q_intent_general")}</option>
                         </select>
                       </div>
 
@@ -578,19 +596,16 @@ export function QuickLeadModal({
                         <select
                           value={purchaseTimeline}
                           onChange={(e) => setPurchaseTimeline(e.target.value as PurchaseTimeline)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
+                          className="w-full glass-input rounded-lg p-2 text-white"
                         >
-                          <option value="within_30_days">{t("q_timeline_30d")}</option>
-                          <option value="1_3_months">{t("q_timeline_1_3m")}</option>
-                          <option value="3_6_months">{t("q_timeline_3_6m")}</option>
-                          <option value="6_12_months">{t("q_timeline_6_12m")}</option>
-                          <option value="unknown">{t("q_timeline_unknown")}</option>
+                          <option value="within_30_days" className="bg-slate-900">{t("q_timeline_30d")}</option>
+                          <option value="1_to_3_months" className="bg-slate-900">{t("q_timeline_1_3m")}</option>
+                          <option value="3_to_6_months" className="bg-slate-900">{t("q_timeline_3_6m")}</option>
+                          <option value="more_than_6_months" className="bg-slate-900">{t("q_timeline_6_12m")}</option>
+                          <option value="unknown" className="bg-slate-900">{t("q_timeline_unknown")}</option>
                         </select>
                       </div>
-                    </div>
 
-                    {/* Budget & Decision Role */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block text-slate-400 mb-1 font-medium">
                           {t("q_budget_status")}
@@ -598,29 +613,12 @@ export function QuickLeadModal({
                         <select
                           value={budgetStatus}
                           onChange={(e) => setBudgetStatus(e.target.value as BudgetStatus)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
+                          className="w-full glass-input rounded-lg p-2 text-white"
                         >
-                          <option value="budget_available">{t("q_budget_available")}</option>
-                          <option value="financing_needed">{t("q_budget_financing")}</option>
-                          <option value="budget_not_defined">{t("q_budget_undefined")}</option>
-                          <option value="not_discussed">{t("q_budget_not_discussed")}</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-400 mb-1 font-medium">
-                          {t("q_decision_authority")}
-                        </label>
-                        <select
-                          value={decisionRole}
-                          onChange={(e) => setDecisionRole(e.target.value as DecisionRole)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
-                        >
-                          <option value="owner">{t("q_owner")}</option>
-                          <option value="decision_maker">{t("q_decision_maker")}</option>
-                          <option value="purchasing_manager">{t("q_purchasing")}</option>
-                          <option value="technical_evaluator">{t("q_technical")}</option>
-                          <option value="influencer">{t("q_influencer")}</option>
+                          <option value="budget_available" className="bg-slate-900">{t("q_budget_available")}</option>
+                          <option value="financing_needed" className="bg-slate-900">{t("q_budget_financing")}</option>
+                          <option value="budget_not_defined" className="bg-slate-900">{t("q_budget_undefined")}</option>
+                          <option value="not_discussed" className="bg-slate-900">{t("q_budget_not_discussed")}</option>
                         </select>
                       </div>
                     </div>
@@ -630,11 +628,11 @@ export function QuickLeadModal({
             </div>
 
             {/* Modal Footer with Save Lead Action */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3">
+            <div className="p-4 sm:p-5 border-t border-white/10 bg-white/[0.02] flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                className="px-4 py-3 rounded-xl glass-pill text-slate-300 hover:text-white text-xs font-semibold"
               >
                 {t("cancel")}
               </button>
@@ -642,7 +640,7 @@ export function QuickLeadModal({
               <button
                 type="submit"
                 disabled={isSaving || !fullName.trim() || !phone.trim() || (!!duplicateLead && !bypassDuplicate)}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-falcon-600 to-falcon-500 hover:from-falcon-500 hover:to-falcon-400 text-white font-bold text-sm shadow-lg shadow-falcon-600/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-5 rounded-xl bg-gradient-to-r from-falcon-600 via-cyan-500 to-falcon-500 hover:brightness-110 text-white font-extrabold text-sm shadow-[0_8px_25px_rgba(14,165,233,0.4)] border border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95"
               >
                 <Zap className="w-4 h-4 fill-white" />
                 <span>{isSaving ? t("loading") : t("save_lead_btn")}</span>

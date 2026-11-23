@@ -37,7 +37,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_total_leads"),
       value: stats.totalLeads,
       icon: Users,
-      color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+      iconColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+      accentGlow: "group-hover:shadow-[0_0_20px_rgba(14,165,233,0.2)]",
       filterUrl: "/leads",
     },
     {
@@ -45,7 +46,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_new_leads"),
       value: stats.newLeads,
       icon: UserPlus,
-      color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+      iconColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+      accentGlow: "group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]",
       filterUrl: "/leads?stage=new_lead",
     },
     {
@@ -53,7 +55,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_hot_leads"),
       value: stats.hotLeads,
       icon: Flame,
-      color: "text-red-400 bg-red-500/10 border-red-500/20",
+      iconColor: "text-red-400 bg-red-500/15 border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.35)]",
+      accentGlow: "group-hover:shadow-[0_0_25px_rgba(239,68,68,0.25)]",
       filterUrl: "/leads?temp=HOT",
       badge: "Priority",
     },
@@ -62,7 +65,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_overdue_followups"),
       value: stats.overdueFollowups,
       icon: AlertCircle,
-      color: "text-rose-400 bg-rose-500/10 border-rose-500/20",
+      iconColor: "text-rose-400 bg-rose-500/15 border-rose-500/40",
+      accentGlow: "group-hover:shadow-[0_0_25px_rgba(244,63,94,0.25)]",
       filterUrl: "/followups?view=overdue",
       highlight: stats.overdueFollowups > 0,
     },
@@ -71,7 +75,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_followups_today"),
       value: stats.followupsToday,
       icon: CalendarCheck,
-      color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+      iconColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+      accentGlow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]",
       filterUrl: "/followups?view=today",
     },
     {
@@ -79,7 +84,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_qualified_leads"),
       value: stats.qualifiedLeads,
       icon: Award,
-      color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+      iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+      accentGlow: "group-hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]",
       filterUrl: "/leads?stage=qualified",
     },
     {
@@ -87,7 +93,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_quotations_sent"),
       value: stats.quotationsSent,
       icon: FileCheck,
-      color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+      iconColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+      accentGlow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]",
       filterUrl: "/pipeline?stage=quotation_sent",
     },
     {
@@ -95,8 +102,10 @@ export function KpiCards({ stats }: KpiCardsProps) {
       label: t("kpi_won_deals"),
       value: stats.wonDeals,
       icon: Trophy,
-      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+      iconColor: "text-emerald-400 bg-emerald-500/15 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.35)]",
+      accentGlow: "group-hover:shadow-[0_0_25px_rgba(16,185,129,0.25)]",
       filterUrl: "/pipeline?stage=won",
+      badge: "Deals",
     },
   ];
 
@@ -108,25 +117,30 @@ export function KpiCards({ stats }: KpiCardsProps) {
           <div
             key={card.id}
             onClick={() => router.push(card.filterUrl)}
-            className={`p-3 sm:p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex flex-col justify-between group ${
-              card.highlight ? "ring-1 ring-rose-500/40 bg-rose-950/10" : ""
-            }`}
+            className={`p-3.5 sm:p-4 rounded-2xl glass-card glass-card-hover cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
+              card.highlight
+                ? "ring-1 ring-rose-500/50 bg-gradient-to-b from-rose-950/20 to-slate-950/80 shadow-[0_0_20px_rgba(244,63,94,0.2)]"
+                : ""
+            } ${card.accentGlow}`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-medium line-clamp-1">
+            {/* Specular Edge Highlight */}
+            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] sm:text-xs text-slate-400 font-semibold line-clamp-1 group-hover:text-slate-200 transition-colors">
                 {card.label}
               </span>
-              <div className={`p-1.5 rounded-lg border ${card.color}`}>
-                <Icon className="w-4 h-4 shrink-0" />
+              <div className={`p-2 rounded-xl border ${card.iconColor} transition-transform group-hover:scale-110 duration-200 shrink-0`}>
+                <Icon className="w-4 h-4" />
               </div>
             </div>
 
             <div className="flex items-baseline justify-between mt-3">
-              <span className="text-xl sm:text-2xl font-black text-white font-mono group-hover:text-falcon-400 transition-colors">
+              <span className="text-xl sm:text-2xl font-black text-white font-mono group-hover:text-cyan-300 transition-colors tracking-tight">
                 {card.value}
               </span>
               {card.badge && (
-                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/[0.06] text-amber-300 border border-amber-400/30">
                   {card.badge}
                 </span>
               )}

@@ -163,16 +163,16 @@ export function PipelineKanban({
             key={stage}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, stage)}
-            className={`w-72 shrink-0 rounded-2xl border flex flex-col max-h-[calc(100vh-12rem)] transition-colors ${
+            className={`w-72 shrink-0 rounded-2xl border flex flex-col max-h-[calc(100vh-12rem)] transition-all ${
               isWon
-                ? "bg-emerald-950/20 border-emerald-800/40"
+                ? "bg-emerald-950/20 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
                 : isLost
-                ? "bg-rose-950/20 border-rose-800/40"
-                : "bg-slate-900/60 border-slate-800"
+                ? "bg-rose-950/20 border-rose-500/40 shadow-[0_0_20px_rgba(244,63,94,0.15)]"
+                : "glass-panel border-white/10"
             }`}
           >
             {/* COLUMN HEADER */}
-            <div className="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 rounded-t-2xl">
+            <div className="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/[0.02] rounded-t-2xl">
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-xs text-white">
@@ -203,7 +203,7 @@ export function PipelineKanban({
                     draggable
                     onDragStart={(e) => handleDragStart(e, lead.id)}
                     onClick={() => onOpenLeadProfile(lead)}
-                    className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-falcon-500/60 text-xs cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all space-y-2 group"
+                    className="p-3.5 rounded-2xl glass-card glass-card-hover text-xs cursor-grab active:cursor-grabbing space-y-2 group relative overflow-hidden"
                   >
                     <div className="flex items-start justify-between gap-1.5">
                       <span className="font-bold text-white group-hover:text-falcon-400 transition-colors line-clamp-1">
